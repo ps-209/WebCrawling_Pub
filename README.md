@@ -1,5 +1,5 @@
 # WebCrawling_Pub
 for somewhat finished code
 Adding
- -progress bar?
- -finished alarm
+ 1. progress bar?
+ 2. finished alarm
