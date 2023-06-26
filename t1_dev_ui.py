@@ -16,15 +16,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QLabel, QLineEdit,
-    QMainWindow, QPushButton, QSizePolicy, QWidget)
+    QMainWindow, QProgressBar, QPushButton, QSizePolicy,
+    QWidget)
 import resource_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(491, 171)
-        MainWindow.setMaximumSize(QSize(491, 171))
+        MainWindow.resize(491, 202)
+        MainWindow.setMaximumSize(QSize(491, 231))
         icon = QIcon()
         icon.addFile(u":/newPrefix/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -71,6 +72,10 @@ class Ui_MainWindow(object):
         self.keyword_edit = QLineEdit(self.centralwidget)
         self.keyword_edit.setObjectName(u"keyword_edit")
         self.keyword_edit.setGeometry(QRect(10, 90, 311, 31))
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
+        self.progressBar.setGeometry(QRect(10, 170, 471, 23))
+        self.progressBar.setValue(0)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)

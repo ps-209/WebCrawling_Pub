@@ -3,13 +3,14 @@ from typing import Optional
 import PySide6.QtCore
 from PySide6.QtWidgets import *
 from t1_dev_ui import Ui_MainWindow
-from get_image import Img
-from crawling_dev_v2 import Txt
+from get_image import Image
+from crawling_dev_v2 import Text
 from threading import Thread
 
 class Main_window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(Main_window,self).__init__()
+        self.work_thread = None
         self.setupUi(self)
         self.search_button.clicked.connect(self.directory)
         self.photo_button.clicked.connect(self.image)
@@ -55,11 +56,16 @@ class Main_window(QMainWindow, Ui_MainWindow):
             return
         
         count = int(self.comboBox.currentText())
+        self.progressBar.setMaximum(count)
         try:
-            Img(keyword,count,directory)
+            self.work_thread = Image(keyword,count,directory)
+            self.work_thread.progress_updated.connect(self.update_progress)
+            self.work_thread.finished.connect(self.SE)
+            self.work_thread.start()
         except:
             print('error-1')
-        self.SE()
+            return
+ 
 
     def text(self): #텍스트
         self.SD()
@@ -75,11 +81,24 @@ class Main_window(QMainWindow, Ui_MainWindow):
             return
         
         count = int(self.comboBox.currentText())
+        self.progressBar.setMaximum(count)
         try:
-            Txt(keyword,count,directory)
+            self.work_thread = Text(keyword,count,directory)
+            self.work_thread.progress_updated.connect(self.update_progress)
+            self.work_thread.finished.connect(self.SE)
+            self.work_thread.start()
         except:
             print('error-2')
-        self.SE()
+            return
+
+    def update_progress(self,value):
+        self.progressBar.setValue(value)
+
+    def closeEvent(self,event):
+        if(self.work_thread and self.work_thread.isRunning()):
+            self.work_thread.quit()
+            self.work_thread.wait()
+        event.accept()
 
     def AlartBox(self):
         alartbox = QMessageBox(self)
@@ -87,7 +106,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         alartbox.setText("Please fill empty parts!")
         alartbox.setIcon(QMessageBox.Warning)
         button1 = alartbox.exec()
-    
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
