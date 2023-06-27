@@ -12,6 +12,7 @@ from get_text import Text
 class Main_window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(Main_window,self).__init__()
+        self.setFixedSize(491, 202)
         self.work_thread = None
         self.setupUi(self)
         self.search_button.clicked.connect(self.directory)
@@ -24,6 +25,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.photo_button.setDisabled(True)
         self.keyword_edit.setDisabled(True)
         self.directory_edit.setDisabled(True)
+        self.comboBox.setDisabled(True)
 
     def SE(self): #버튼 활성화
         self.search_button.setEnabled(True)
@@ -31,6 +33,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.photo_button.setEnabled(True)
         self.keyword_edit.setEnabled(True)
         self.directory_edit.setEnabled(True)
+        self.comboBox.setEnabled(True)
     
     def directory(self): #경로 설정
         direct = QFileDialog.getExistingDirectory(self)
@@ -64,10 +67,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread = Image(keyword,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
+            self.work_thread.process_complete.connect(self.ending)
             self.work_thread.finished.connect(self.SE)
             self.work_thread.start()
         except:
-            print('error-1')
+            self.error("Error on Searching Image")
             return
  
 
@@ -90,10 +94,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread = Text(keyword,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
+            self.work_thread.process_complete.connect(self.ending)
             self.work_thread.finished.connect(self.SE)
             self.work_thread.start()
         except:
-            print('error-2')
+            self.error("Error on Searching Text")
             return
 
     def update_progress(self,value):
@@ -101,6 +106,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def error(self,content):
         self.AlartBox(content)
+
+    def ending(self,title,content):
+        self.CompleteBox(title,content)
 
     def closeEvent(self,event):
         if(self.work_thread and self.work_thread.isRunning()):
@@ -110,10 +118,17 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def AlartBox(self,content):
         alartbox = QMessageBox(self)
-        alartbox.setWindowTitle("Inform")
+        alartbox.setWindowTitle("Warning")
         alartbox.setText(content)
-        alartbox.setIcon(QMessageBox.Warning)
+        alartbox.setIcon(QMessageBox.Critical)
         alartbox.exec()
+
+    def CompleteBox(self,title,content):
+        combox = QMessageBox(self)
+        combox.setWindowTitle(title)
+        combox.setText(content)
+        combox.setIcon(QMessageBox.Information)
+        combox.exec()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
