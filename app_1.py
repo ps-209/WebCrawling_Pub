@@ -3,9 +3,11 @@ from typing import Optional
 import PySide6.QtCore
 from PySide6.QtWidgets import *
 from t1_dev_ui import Ui_MainWindow
-from get_image import Image
-from crawling_dev_v2 import Text
 from threading import Thread
+#사용자 파일
+from get_image import Image
+from get_text import Text
+
 
 class Main_window(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -108,7 +110,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def AlartBox(self,content):
         alartbox = QMessageBox(self)
-        alartbox.setWindowTitle("ERROR")
+        alartbox.setWindowTitle("Inform")
         alartbox.setText(content)
         alartbox.setIcon(QMessageBox.Warning)
         alartbox.exec()
