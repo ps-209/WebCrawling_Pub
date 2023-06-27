@@ -40,18 +40,19 @@ class Main_window(QMainWindow, Ui_MainWindow):
         MBox.setWindowTitle("Information")
         MBox.setText("Directory is confirmed")
         MBox.setIcon(QMessageBox.Information)
-        button1 = MBox.exec()
+        MBox.exec()
         
     def image(self): #이미지
         self.SD()
-        thread = Thread(target=self.img_search)
+        thread = Thread(target=self.img_search(self))
         thread.start()
+        #여기서 self는 메인윈도우의 스레드 코드를 가지고 있으므로 넘겨줘야 창이 뜸
 
-    def img_search(self):
+    def img_search(self,main):
         keyword = self.keyword_edit.text()
         directory = self.directory_edit.text() + '/'
         if(not directory or not keyword):
-            self.AlartBox()
+            main.AlartBox("Please fill empty parts!")
             self.SE()
             return
         
@@ -60,6 +61,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         try:
             self.work_thread = Image(keyword,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
+            self.work_thread.error_occur.connect(self.error)
             self.work_thread.finished.connect(self.SE)
             self.work_thread.start()
         except:
@@ -69,14 +71,14 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def text(self): #텍스트
         self.SD()
-        thread = Thread(target=self.txt_search)
+        thread = Thread(target=self.txt_search(self))
         thread.start()
     
-    def txt_search(self):
+    def txt_search(self,main):
         keyword = self.keyword_edit.text()
         directory = self.directory_edit.text() + '/'
         if(not directory or not keyword):
-            self.AlartBox()
+            main.AlartBox("Please fill empty parts!")
             self.SE()
             return
         
@@ -85,6 +87,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         try:
             self.work_thread = Text(keyword,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
+            self.work_thread.error_occur.connect(self.error)
             self.work_thread.finished.connect(self.SE)
             self.work_thread.start()
         except:
@@ -94,18 +97,21 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def update_progress(self,value):
         self.progressBar.setValue(value)
 
+    def error(self,content):
+        self.AlartBox(content)
+
     def closeEvent(self,event):
         if(self.work_thread and self.work_thread.isRunning()):
             self.work_thread.quit()
             self.work_thread.wait()
         event.accept()
 
-    def AlartBox(self):
+    def AlartBox(self,content):
         alartbox = QMessageBox(self)
         alartbox.setWindowTitle("ERROR")
-        alartbox.setText("Please fill empty parts!")
+        alartbox.setText(content)
         alartbox.setIcon(QMessageBox.Warning)
-        button1 = alartbox.exec()
+        alartbox.exec()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
