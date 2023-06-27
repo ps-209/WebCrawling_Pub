@@ -6,4 +6,4 @@ Adding features
  2. finished alarm - completed
 
 Error
- 1. error on searching image - this code will be replaced with new code
+ 1. error on searching image - solved
