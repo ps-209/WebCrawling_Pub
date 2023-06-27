@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(491, 202)
-        MainWindow.setMaximumSize(QSize(491, 231))
+        MainWindow.setMaximumSize(QSize(491, 202))
         icon = QIcon()
         icon.addFile(u":/newPrefix/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -66,16 +66,24 @@ class Ui_MainWindow(object):
         self.comboBox.addItem("")
         self.comboBox.setObjectName(u"comboBox")
         self.comboBox.setGeometry(QRect(250, 130, 69, 31))
+        font = QFont()
+        font.setPointSize(11)
+        self.comboBox.setFont(font)
         self.directory_edit = QLineEdit(self.centralwidget)
         self.directory_edit.setObjectName(u"directory_edit")
         self.directory_edit.setGeometry(QRect(10, 30, 421, 31))
+        self.directory_edit.setFont(font)
         self.keyword_edit = QLineEdit(self.centralwidget)
         self.keyword_edit.setObjectName(u"keyword_edit")
         self.keyword_edit.setGeometry(QRect(10, 90, 311, 31))
+        self.keyword_edit.setFont(font)
         self.progressBar = QProgressBar(self.centralwidget)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setGeometry(QRect(10, 170, 471, 23))
         self.progressBar.setValue(0)
+        self.label_4 = QLabel(self.centralwidget)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setGeometry(QRect(330, 70, 151, 16))
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -97,5 +105,6 @@ class Ui_MainWindow(object):
         self.comboBox.setItemText(3, QCoreApplication.translate("MainWindow", u"7", None))
         self.comboBox.setItemText(4, QCoreApplication.translate("MainWindow", u"9", None))
 
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Mode</span></p></body></html>", None))
     # retranslateUi
 
