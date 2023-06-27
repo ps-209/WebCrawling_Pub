@@ -9,7 +9,7 @@ from PySide6.QtCore import *
 class Image(QThread):
     progress_updated = Signal(int)
     error_occur = Signal(str)
-
+    process_complete = Signal(str,str)
 
     def __init__(self, keyword,number,folder):
         super().__init__()
@@ -18,28 +18,12 @@ class Image(QThread):
         self.folder = folder
 
     def run(self): #메인
-        keyword = self.keyword
-        directory = self.folder
         max = self.number
 
-        if(keyword == ''):
-            print('keyword is empty')
-            return
-        folder_name = keyword + "_image\\"
-        folder_directory = ''
-        if(directory == ''):
-            present = os.getcwd()
-            print(present)
-            if(not os.path.exists(present + '\\' + folder_name)):
-                os.mkdir(present + '\\' + folder_name)
-            folder_directory = present + '\\' + folder_name
-            print(folder_directory)
-        else:
-            if(not os.path.exists(directory)):
-                os.mkdir(directory)
-            folder_directory = directory + '\\'
-
         self.image_search()
+        self.process_complete.emit("Download Ended","Image Crawling ended\nTotal {} downloaded".format(max))
+        self.quit()
+        self.wait()
     
     def internet(self):
         re = requests.get("https://google.com")
@@ -54,6 +38,7 @@ class Image(QThread):
         keyword = self.keyword
         max = self.number
         folder_directory = self.folder
+
         status = self.internet()
         if(status == 200):
             failed = [-1] #실패한 목록들 번호 리스트
@@ -76,6 +61,7 @@ class Image(QThread):
 
             #검색
             browser.get("https://www.google.com/search?q=" + keyword + "&source=lnms&tbm=isch")
+            browser.implicitly_wait(3)
             browser.execute_script('window.scrollTo(0,0);')
 
             for i in range(1,max+1):
@@ -94,15 +80,17 @@ class Image(QThread):
                 #미리보기 이미지, 클릭된 이미지 대조 확인
                 StartTime = time.time()
                 while True:
-                    Image = browser.find_element(By.XPATH,'//*[@id="Sva75c"]/div[2]/div/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]')
+                    Image = browser.find_element(By.XPATH,'//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]')
                     ImageURL = Image.get_attribute('src')
+
+                    
 
                     if(ImageURL != PreviewURL):
                         break
                     else:
                         CurrentTime = time.time()
                         if(CurrentTime - StartTime > 7):
-                            print("Pass {} for time out".format(i))
+                            #print("Pass {} for time out".format(i))
                             break
                 
 
@@ -110,29 +98,9 @@ class Image(QThread):
                 try:
                     re = requests.get(ImageURL)
                     if(re.status_code == 200):
-                        with open(folder_directory + str(i) + '.jpg', 'wb') as file:
+                        with open(folder_directory + keyword + '-' + str(i) + '.jpg', 'wb') as file:
                             file.write(re.content)
-                    #print("Download success #{}".format(i))
                 except:
-                    #print("download failed {}".format(i))
                     failed.append(i)
                 else:
                     self.progress_updated.emit(i)
-        
-        self.quit()
-        self.wait()
-        
-
-    #이미지 다운로더
-    def download_image(url,folder,num,form):
-        re = requests.get(url)
-        if(re.status_code == 200):
-            with open(os.path.join(folder,str(num) + '.' + form),'wb') as file:
-                file.write(re.content)
-
-#keyword = input("이미지의 이름 : ")
-#max = int(input("이미지의 개수 : "))
-
-#dir = 'C:\Users\Main\Desktop\T1\c'
-#directory = 'C:/Users/Main/Desktop/T1/c'
-#search_start(keyword,max,directory)
