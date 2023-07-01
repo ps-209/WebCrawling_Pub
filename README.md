@@ -8,4 +8,4 @@ Adding features
 
 Error,Problem
  1. error on searching image - solved
- 2. need nltk and konly packages to run properly - nltk solved
+ 2. when convert to exe file txt crawling bs4 and newspaper now working
