@@ -21,7 +21,7 @@ class Image(QThread):
         max = self.number
 
         self.image_search()
-        self.process_complete.emit("Download Ended","Image Crawling ended\nTotal {} downloaded".format(max))
+        self.process_complete.emit("Download Ended","Image Crawling ended\n Total {} downloaded".format(max))
         self.quit()
         self.wait()
     

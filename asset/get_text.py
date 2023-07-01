@@ -1,7 +1,7 @@
 import requests, re
 from bs4 import BeautifulSoup
 from newspaper import Article
-from asset.summarize_optimization import summarize_sentence
+from asset.summarize_v3 import summarize
 from PySide6.QtCore import *
 
 class Text(QThread):
@@ -38,7 +38,10 @@ class Text(QThread):
             article = Article(url,language)
             article.download()
             article.parse()
-            return article.text
+            if(article.text == ''):
+                return '01'
+            else:
+                return article.text
         except:
             return '01'
 
@@ -53,7 +56,7 @@ class Text(QThread):
         with open(folder_directory + key_word + '.txt','w', encoding='utf-8') as file:
             for i in range(count):
                 file.write(str(contents[i]) + '\n')
-        self.process_complete.emit("Crawling Ended","Text Crawling ended\nTotal {}".format(count))
+        self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(count))
         #print("success")
 
     def run(self):
@@ -96,15 +99,21 @@ class Text(QThread):
                     original_page = self.t2_crawling(search_link,language)
                 
                     if(original_page == '01'):
-                        #print('crawling error. skip this page')
+                        #빈 페이지 또는 크롤링 실패
                         continue
                     if(language != 'ko' and language != 'en'):
                         continue
 
-                    converted_page = summarize_sentence(language, original_page, 0.85, 5)
+                    converted_page = summarize(language, original_page, 0.85, 5)
 
-                    if(len(converted_page) <= 5):
-                        #print('error on summarization. Code : ' + converted_page)
+                    if(converted_page == '001'):
+                        #패키지 감지 실패시 경고
+                        self.error_occur.emit("package lost")
+                    elif(converted_page == '002'):
+                        #벡터화 작업중 실패
+                        continue
+                    elif(converted_page == '004'):
+                        #페이지 요약 실패시 넘어감
                         continue
 
                     contents.append(title[count] + ' : ' + search_link + '\n' + converted_page + '\n')
