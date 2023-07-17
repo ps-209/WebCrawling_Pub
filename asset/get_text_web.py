@@ -82,6 +82,6 @@ class Web_Text(QThread):
             self.save_text(collection,num,folder)
         
         self.quit()
-        self.wait()
+        self.wait(3000)
 
     
