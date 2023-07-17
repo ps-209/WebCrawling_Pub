@@ -13,6 +13,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.setFixedSize(491, 202)
         self.work_thread = None
         self.setupUi(self)
+        self.show()
         self.search_button.clicked.connect(self.directory)
         self.photo_button.clicked.connect(self.image)
         self.text_button.clicked.connect(self.text)
@@ -116,10 +117,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.SE()
             return
         
+        key_list = keyword.split(';')
         count = int(self.comboBox.currentText())
-        self.progressBar.setMaximum(count)
+        self.progressBar.setMaximum(count * len(key_list))
         try:
-            self.work_thread = Text(keyword,count,directory)
+            self.work_thread = Text(key_list,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -165,7 +167,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread.quit()
             self.work_thread.wait()
         event.accept()
-        sys.exit()
+        QApplication.quit()
 
     def AlartBox(self,content):
         alartbox = QMessageBox(self)
@@ -185,9 +187,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     window = Main_window()
-    window.show()
 
-    app.exec()
+    sys.exit(app.exec())
 
 #새로운 스레드에서 함수를 시작하지 않으면 함수가 끝날 때까지 GUI가 멈추기 때문에
 #thread 사용으로 새로운 함수를 시작하도록 함
