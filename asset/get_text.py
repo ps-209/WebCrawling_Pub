@@ -132,7 +132,7 @@ class Text(QThread):
                 self.save_text(key,contents,success,folder)
         self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(total_count))
         self.quit()
-        self.wait()
+        self.wait(3000)
 
 
 #ERROR CODE
