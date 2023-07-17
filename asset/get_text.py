@@ -96,7 +96,7 @@ class Text(QThread):
                     search_link = i.a.attrs['href'] #링크 설정
             
                     language = self.get_language(title[count])
-                    original_page = self.t2_crawling(search_link,language)
+                    original_page = self.t_crawling(search_link,language)
                 
                     if(original_page == '01'):
                         #빈 페이지 또는 크롤링 실패
