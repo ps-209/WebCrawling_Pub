@@ -33,9 +33,9 @@ class Text(QThread):
         except:
             return '01'
 
-    def t2_crawling(self,url,language): #newspaper모듈 사용
+    def t2_crawling(self,url): #newspaper모듈 사용
         try:
-            article = Article(url,language)
+            article = Article(url)
             article.download()
             article.parse()
             if(article.text == ''):
@@ -56,79 +56,83 @@ class Text(QThread):
         with open(folder_directory + key_word + '.txt','w', encoding='utf-8') as file:
             for i in range(count):
                 file.write(str(contents[i]) + '\n')
-        self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(count))
-        #print("success")
+        
 
     def run(self):
-        key_word = str(self.keyword)
+        key_word = self.keyword
         number = int(self.number)
         folder = self.folder
         
         status = self.internet()
+        total_count = 0
         if(status == 200):
+            for key in key_word:
+                g_link = 'https://www.google.com/search?q=' + key
+                headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'}
 
-            g_link = 'https://www.google.com/search?q=' + key_word
-            headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'}
+                response = requests.get(g_link, headers=headers).text
+                soup = BeautifulSoup(response,'html.parser')
 
-            response = requests.get(g_link, headers=headers).text
-            soup = BeautifulSoup(response,'html.parser')
+                #제목 가져오기
+                catalog = soup.select('.LC20lb')
+                title = []
+                for i in catalog:
+                    title.append(i.get_text())
 
-            #제목 가져오기
-            catalog = soup.select('.LC20lb')
-            title = []
-            for i in catalog:
-                title.append(i.get_text())
+                #본문 링크 가져오기
+                document = soup.select('.yuRUbf')
 
-            #본문 링크 가져오기
-            document = soup.select('.yuRUbf')
+                count = 0 #크롤링할 페이지 수 세기
+                success = 0
+                search_link = '' #링크 확인용
+                contents = [] #내용을 담을 리스트
 
-            count = 0 #크롤링할 페이지 수 세기
-            search_link = '' #링크 확인용
-            contents = [] #내용을 담을 리스트
-
-            #크롤링
-            for i in document:
-                if(count == number): #개수가 정해진 숫자에 도달하거나 이전 링크와 동일하다면 패스
-                    break
-                elif(i.a.attrs['href'] == search_link):
-                    continue
-                else:
-                    search_link = i.a.attrs['href'] #링크 설정
-            
-                    language = self.get_language(title[count])
-                    original_page = self.t_crawling(search_link,language)
+                #크롤링
+                for i in document:
+                    if(success == number): #개수가 정해진 숫자에 도달하거나 이전 링크와 동일하다면 패스
+                        break
+                    elif(i.a.attrs['href'] == search_link):
+                        count += 1
+                        continue
+                    else:
+                        search_link = i.a.attrs['href'] #링크 설정
                 
-                    if(original_page == '01'):
-                        #빈 페이지 또는 크롤링 실패
-                        continue
-                    if(language != 'ko' and language != 'en'):
-                        continue
+                        language = self.get_language(title[count])
+                        original_page = self.t2_crawling(search_link)
+                    
+                        if(original_page == '01'):
+                            #빈 페이지 또는 크롤링 실패
+                            count += 1
+                            continue
+                        if(language != 'ko' and language != 'en'):
+                            count += 1
+                            continue
 
-                    converted_page = summarize(language, original_page, 0.85, 5)
+                        converted_page = summarize(language, original_page, 0.85, 5)
 
-                    if(converted_page == '001'):
-                        #패키지 감지 실패시 경고
-                        self.error_occur.emit("package lost")
-                    elif(converted_page == '002'):
-                        #벡터화 작업중 실패
-                        continue
-                    elif(converted_page == '004'):
-                        #페이지 요약 실패시 넘어감
-                        continue
+                        if(converted_page == '001'):
+                            #패키지 감지 실패시 경고
+                            self.error_occur.emit("package lost")
+                            break
+                        elif(converted_page == '002'):
+                            #벡터화 작업중 실패
+                            count += 1
+                            continue
+                        elif(converted_page == '004'):
+                            #페이지 요약 실패시 넘어감
+                            count += 1
+                            continue
 
-                    contents.append(title[count] + ' : ' + search_link + '\n' + converted_page + '\n')
-                    count += 1
-                    self.progress_updated.emit(count)
+                        contents.append(title[success] + ' : ' + search_link + '\n' + converted_page + '\n')
+                        count += 1
+                        success += 1
+                        total_count += 1
+                        self.progress_updated.emit(total_count)
 
-            self.save_text(key_word,contents,count,folder)
-
+                self.save_text(key,contents,success,folder)
+        self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(total_count))
         self.quit()
         self.wait()
-
-    
-# word = str(input('Search for : '))
-# number = int(input('How many : '))
-#searching(word,number,directory)
 
 
 #ERROR CODE
