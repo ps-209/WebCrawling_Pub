@@ -84,6 +84,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         
         count = int(self.comboBox.currentText())
         self.progressBar.setMaximum(count)
+        self.progressBar.setValue(0)
         try:
             self.work_thread = Image(keyword,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
@@ -93,6 +94,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread.start()
         except:
             self.error("Error on Searching Image")
+            self.SE()
             return
  
 
@@ -120,6 +122,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         key_list = keyword.split(';')
         count = int(self.comboBox.currentText())
         self.progressBar.setMaximum(count * len(key_list))
+        self.progressBar.setValue(0)
         try:
             self.work_thread = Text(key_list,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
@@ -142,6 +145,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         site1 = url.split(';')
         site2 = [i.strip() for i in site1]
         self.progressBar.setMaximum(len(site2))
+        self.progressBar.setValue(0)
         try:
             self.work_thread = Web_Text(site2,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
