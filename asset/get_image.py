@@ -1,9 +1,9 @@
-from typing import Optional
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-import time, os, requests
+import time, requests
+from subprocess import CREATE_NO_WINDOW
 from PySide6.QtCore import *
 
 class Image(QThread):
@@ -12,7 +12,7 @@ class Image(QThread):
     process_complete = Signal(str,str)
 
     def __init__(self, keyword,number,folder):
-        super().__init__()
+        super(Image,self).__init__()
         self.keyword = keyword
         self.number = number
         self.folder = folder
@@ -23,7 +23,7 @@ class Image(QThread):
         self.image_search()
         self.process_complete.emit("Download Ended","Image Crawling ended\n Total {} downloaded".format(max))
         self.quit()
-        self.wait()
+        self.wait(3000)
     
     def internet(self):
         re = requests.get("https://google.com")
@@ -57,7 +57,9 @@ class Image(QThread):
             
             #브라우저
             #bw_options.add_experimental_option('detach', True)
-            browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=bw_options)
+            serv = Service(ChromeDriverManager().install())
+            serv.creationflags = CREATE_NO_WINDOW
+            browser = webdriver.Chrome(service=serv,options=bw_options)
 
             #검색
             browser.get("https://www.google.com/search?q=" + keyword + "&source=lnms&tbm=isch")
