@@ -4,8 +4,9 @@ for somewhat finished code
 Adding features
  1. progress bar - completed
  2. finished alarm - completed
- 3. make into exe file - solving problem
+ 3. make into exe file - partially solved
+ 4. exe file size - 300mb
 
 Error,Problem
  1. error on searching image - solved
- 2. not working in exe file, problem in MultiThreading
+ 2. not working in exe file, problem in MultiThreading - solved
