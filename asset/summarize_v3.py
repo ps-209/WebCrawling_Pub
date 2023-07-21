@@ -10,9 +10,9 @@ def pkg_exist():
     try:
         import konlpy, re, numpy, sklearn
     except:
-        return 1 #이상 있음
+        return False
     else:
-        return 0
+        return True
     
 # 리스트 설정
 def wording(language):
@@ -103,8 +103,8 @@ def ranking(graph, point):
     return {idx: r[0] for idx, r in enumerate(ranks)}
 
 def summarize(language, original_text, point, number):
-    exist = pkg_exist()
-    if(exist == 1):
+    pkg = pkg_exist()
+    if(pkg == False):
         return '001'
     else:
         wording(language)

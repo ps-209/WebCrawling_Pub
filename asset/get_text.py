@@ -20,21 +20,11 @@ class Text(QThread):
         re = requests.get("https://google.com")
         if(re.status_code != 200):
             self.error_occur.emit("lost internet connection")
-            return 1
+            return False
         else:
-            return 200
+            return True
 
-    def t_crawling(self,link): #링크 설정시 페이지 전체 내용 크롤링
-        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'}
-        t_page = requests.get(link, headers=headers).text
-        t_soup = BeautifulSoup(t_page, 'html.parser')
-        try:
-            text = t_soup.get_text()
-            return text
-        except:
-            return '01'
-
-    def t2_crawling(self,url): #newspaper모듈 사용
+    def t_crawling(self,url): #newspaper모듈 사용
         try:
             article = Article(url)
             article.download()
@@ -66,7 +56,7 @@ class Text(QThread):
         status = self.internet()
         total_count = 0
         key_word_check = 0 #몇번쨰 키워드인지 구별용
-        if(status == 200):
+        if(status):
             for key in key_word:
                 g_link = 'https://www.google.com/search?q=' + key
                 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'}
@@ -74,7 +64,7 @@ class Text(QThread):
                 response = requests.get(g_link, headers=headers).text
                 soup = BeautifulSoup(response,'html.parser')
 
-                count = 0 #크롤링할 페이지 수 세기
+                count = 0 #크롤링 페이지 번호
                 success = 0
                 search_link = '' #링크 확인용
                 contents = [] #내용을 담을 리스트
@@ -103,7 +93,7 @@ class Text(QThread):
                         search_link = i.a.attrs['href'] #링크 설정
                 
                         language = self.get_language(title[count])
-                        original_page = self.t2_crawling(search_link)
+                        original_page = self.t_crawling(search_link)
                     
                         if(original_page == '01'):
                             #빈 페이지 또는 크롤링 실패

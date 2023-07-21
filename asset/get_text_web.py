@@ -18,9 +18,9 @@ class Web_Text(QThread):
         re = requests.get("https://google.com")
         if(re.status_code != 200):
             self.error_occur.emit("lost internet connection")
-            return 1
+            return False
         else:
-            return 200
+            return True
         
     def crawling(self,site):
         try:
@@ -58,7 +58,7 @@ class Web_Text(QThread):
         num = 0
         collection = []
         status = self.internet()
-        if(status == 200):
+        if(status):
             for i in sites:
                 contents = self.crawling(i)
                 if(contents == '01'):#실패 처리
