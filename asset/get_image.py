@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import time, requests
-from subprocess import CREATE_NO_WINDOW
+import os, logging
 from PySide6.QtCore import *
 
 class Image(QThread):
@@ -21,7 +21,7 @@ class Image(QThread):
         max = self.number
 
         self.image_search()
-        self.process_complete.emit("Download Ended","Image Crawling ended\n Total {} downloaded".format(max))
+        
         self.quit()
         self.wait(3000)
     
@@ -38,10 +38,10 @@ class Image(QThread):
         keyword = self.keyword
         max = self.number
         folder_directory = self.folder
+        failed = int(0)
 
         status = self.internet()
         if(status == 200):
-            failed = [-1] #실패한 목록들 번호 리스트
 
             #브라우저 설정
             #bw_options = Options()
@@ -57,8 +57,9 @@ class Image(QThread):
             
             #브라우저
             #bw_options.add_experimental_option('detach', True)
+            os.environ['WDM_PROGRESS_BAR'] = str(0)
+            os.environ['WDM_LOG'] = str(logging.NOTSET)
             serv = Service(ChromeDriverManager().install())
-            serv.creationflags = CREATE_NO_WINDOW
             browser = webdriver.Chrome(service=serv,options=bw_options)
 
             #검색
@@ -103,6 +104,8 @@ class Image(QThread):
                         with open(folder_directory + keyword + '-' + str(i) + '.jpg', 'wb') as file:
                             file.write(re.content)
                 except:
-                    failed.append(i)
+                    failed += 1
                 else:
                     self.progress_updated.emit(i)
+
+            self.process_complete.emit("Download Ended","Image Crawling ended\n Total {} downloaded".format(max - failed))
