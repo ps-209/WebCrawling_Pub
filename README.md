@@ -10,4 +10,4 @@ Error,Problem
  1. error on searching image - solved
  2. not working in exe file, problem in MultiThreading - solved
  3. error on without console in exe - solved
- 4. When turn off, Resources on the computer are not returned
+ 4. When turn off, Resources on the computer are not returned - solved
