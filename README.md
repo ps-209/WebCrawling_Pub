@@ -9,3 +9,4 @@ Adding features
 Error,Problem
  1. error on searching image - solved
  2. not working in exe file, problem in MultiThreading - solved
+ 3. error on without console in exe - WebDriverManager,qthread
