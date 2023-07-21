@@ -68,12 +68,12 @@ class Main_window(QMainWindow, Ui_MainWindow):
             main.AlartBox("Please fill empty parts!")
             self.SE()
             return
-        
+        keylist = keyword.split(';')
         count = int(self.comboBox.currentText())
-        self.progressBar.setMaximum(count)
+        self.progressBar.setMaximum(count * len(keylist))
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Image(keyword,count,directory)
+            self.work_thread = Image(keylist,count,directory)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -84,7 +84,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.SE()
             return
  
-
     def text(self): #텍스트
         self.SD()
         code = self.check_key()
