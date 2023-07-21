@@ -33,19 +33,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.keyword_edit.setEnabled(True)
         self.directory_edit.setEnabled(True)
         self.comboBox.setEnabled(True)
-
-    def checking(self):
-        try:
-            from asset.get_image import Image
-            from asset.get_text import Text
-            return 0
-        except:
-            MBox = QMessageBox(self)
-            MBox.setWindowTitle("Error")
-            MBox.setText("import failed")
-            MBox.setIcon(QMessageBox.Information)
-            MBox.exec()
-            return 1
     
     def check_key(self):#웹사이트 == 1, 일반 키워드 == 0
         content = self.keyword_edit.text()
@@ -165,11 +152,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def ending(self,title,content):
         self.CompleteBox(title,content)
+        self.work_thread.stop()
 
     def closeEvent(self,event):
         if(self.work_thread and self.work_thread.isRunning()):
-            self.work_thread.quit()
-            self.work_thread.wait()
+            self.work_thread.stop()
         event.accept()
         QApplication.quit()
 

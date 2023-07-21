@@ -10,10 +10,11 @@ class Text(QThread):
     process_complete = Signal(str,str)
 
     def __init__(self, keyword, number, folder):
-        super().__init__()
+        super(Text,self).__init__()
         self.keyword = keyword
         self.number = number
         self.folder = folder
+        self.power = True
 
     def internet(self):
         re = requests.get("https://google.com")
@@ -57,14 +58,14 @@ class Text(QThread):
             for i in range(count):
                 file.write(str(contents[i]) + '\n')
         
-
-    def run(self):
+    def get_text(self):
         key_word = self.keyword
         number = int(self.number)
         folder = self.folder
         
         status = self.internet()
         total_count = 0
+        key_word_check = 0 #몇번쨰 키워드인지 구별용
         if(status == 200):
             for key in key_word:
                 g_link = 'https://www.google.com/search?q=' + key
@@ -73,19 +74,23 @@ class Text(QThread):
                 response = requests.get(g_link, headers=headers).text
                 soup = BeautifulSoup(response,'html.parser')
 
-                #제목 가져오기
-                catalog = soup.select('.LC20lb')
-                title = []
-                for i in catalog:
-                    title.append(i.get_text())
-
-                #본문 링크 가져오기
-                document = soup.select('.yuRUbf')
-
                 count = 0 #크롤링할 페이지 수 세기
                 success = 0
                 search_link = '' #링크 확인용
                 contents = [] #내용을 담을 리스트
+                
+                #제목 가져오기
+                try:
+                    catalog = soup.select('.LC20lb')
+                    title = []
+                    for i in catalog:
+                        title.append(i.get_text())
+                except: #가져오는데 실패시 내용을 failed로 저장하고 다음 키워드로 넘어감
+                    contents.append("search failed\n")
+                    self.progress_updated.emit(key_word_check * number)
+                    continue
+                #본문 링크 가져오기
+                document = soup.select('.yuRUbf')
 
                 #크롤링
                 for i in document:
@@ -128,11 +133,21 @@ class Text(QThread):
                         success += 1
                         total_count += 1
                         self.progress_updated.emit(total_count)
-
+                #크롤링 종료 후 저장
                 self.save_text(key,contents,success,folder)
+                key_word_check += 1
         self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(total_count))
+        self.power = False
+
+    def run(self):
+        while(self.power):
+            self.get_text()
+    
+    def stop(self):
+        self.power = False
         self.quit()
         self.wait(3000)
+        
 
 
 #ERROR CODE

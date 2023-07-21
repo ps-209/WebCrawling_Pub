@@ -9,9 +9,10 @@ class Web_Text(QThread):
     process_complete = Signal(str,str)
 
     def __init__(self, sites, folder):
-        super().__init__()
+        super(Web_Text,self).__init__()
         self.sites = sites
         self.folder = folder
+        self.power = True
 
     def internet(self):
         re = requests.get("https://google.com")
@@ -50,7 +51,7 @@ class Web_Text(QThread):
                 file.write(str(contents[i]) + '\n')
         self.process_complete.emit("Crawling Ended","Web Text Crawling ended\n Total {}".format(count))
 
-    def run(self):
+    def get_web(self):
         sites = self.sites
         folder = self.folder
 
@@ -80,8 +81,14 @@ class Web_Text(QThread):
                 num += 1
                 self.progress_updated.emit(num)
             self.save_text(collection,num,folder)
-        
+
+        self.power = False
+
+    def run(self):
+        while(self.power):
+            self.get_web()
+    
+    def stop(self):
+        self.power = False
         self.quit()
         self.wait(3000)
-
-    

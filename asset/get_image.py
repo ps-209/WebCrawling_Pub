@@ -16,12 +16,14 @@ class Image(QThread):
         self.keyword = keyword
         self.number = number
         self.folder = folder
+        self.power = True
 
     def run(self): #메인
-        max = self.number
+        while(self.power):
+            self.image_search()
 
-        self.image_search()
-        
+    def stop(self):
+        self.power = False
         self.quit()
         self.wait(3000)
     
@@ -109,3 +111,4 @@ class Image(QThread):
                     self.progress_updated.emit(i)
 
             self.process_complete.emit("Download Ended","Image Crawling ended\n Total {} downloaded".format(max - failed))
+            self.power = False
