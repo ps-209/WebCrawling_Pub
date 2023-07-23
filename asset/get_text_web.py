@@ -8,10 +8,11 @@ class Web_Text(QThread):
     error_occur = Signal(str)
     process_complete = Signal(str,str)
 
-    def __init__(self, sites, folder):
+    def __init__(self, sites, folder,sum_number):
         super(Web_Text,self).__init__()
         self.sites = sites
         self.folder = folder
+        self.sum_number = sum_number
         self.power = True
 
     def internet(self):
@@ -45,17 +46,19 @@ class Web_Text(QThread):
         else:
             return 'unknown'
         
-    def save_text(self,contents,count,folder_directory):
+    def save_text(self,count,folder_directory):
+        global collection
         with open(folder_directory + 'site_crawling.txt','w', encoding='utf-8') as file:
             for i in range(count):
-                file.write(str(contents[i]) + '\n')
-        self.process_complete.emit("Crawling Ended","Web Text Crawling ended\n Total {}".format(count))
+                file.write(str(collection[i]) + '\n')
 
     def get_web(self):
         sites = self.sites
         folder = self.folder
+        sum_number = int(self.sum_number)
 
         num = 0
+        global collection
         collection = []
         status = self.internet()
         if(status):
@@ -68,7 +71,7 @@ class Web_Text(QThread):
                     if(language == 'unknown'):
                         collection.append(i + '\nPage Language Error\n')
                     else:
-                        summarized = summarize(language,contents,0.85,5)
+                        summarized = summarize(language,contents,0.85,sum_number)
                         if(summarized == '001'):
                             self.error_occur.emit("package lost")
                             collection.append(i + '\nFailed By Package Lost\n')
@@ -80,8 +83,8 @@ class Web_Text(QThread):
                             collection.append(i + '\n' + summarized + '\n')
                 num += 1
                 self.progress_updated.emit(num)
-            self.save_text(collection,num,folder)
-
+            self.save_text(num,folder)
+        self.process_complete.emit("Crawling Ended","Web Text Crawling ended\n Total {}".format(num))
         self.power = False
 
     def run(self):

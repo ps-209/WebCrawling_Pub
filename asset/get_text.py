@@ -9,11 +9,12 @@ class Text(QThread):
     error_occur = Signal(str)
     process_complete = Signal(str,str)
 
-    def __init__(self, keyword, number, folder):
+    def __init__(self, keyword, number, folder,sum_number):
         super(Text,self).__init__()
         self.keyword = keyword
         self.number = number
         self.folder = folder
+        self.sum_number = sum_number
         self.power = True
 
     def internet(self):
@@ -52,6 +53,7 @@ class Text(QThread):
         key_word = self.keyword
         number = int(self.number)
         folder = self.folder
+        sum_number = int(self.sum_number)
         
         status = self.internet()
         total_count = 0
@@ -103,7 +105,7 @@ class Text(QThread):
                             count += 1
                             continue
 
-                        converted_page = summarize(language, original_page, 0.85, 5)
+                        converted_page = summarize(language, original_page, 0.85, sum_number)
 
                         if(converted_page == '001'):
                             #패키지 감지 실패시 경고
@@ -132,6 +134,7 @@ class Text(QThread):
     def run(self):
         while(self.power):
             self.get_text()
+            break
     
     def stop(self):
         self.power = False

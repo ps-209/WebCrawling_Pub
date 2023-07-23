@@ -11,16 +11,18 @@ class Image(QThread):
     error_occur = Signal(str)
     process_complete = Signal(str,str)
 
-    def __init__(self, keylist,number,folder):
+    def __init__(self, keylist,number,folder,picture_type):
         super(Image,self).__init__()
         self.keylist = keylist
         self.number = number
         self.folder = folder
+        self.picture_type = picture_type
         self.power = True
 
     def run(self): #메인
         while(self.power):
             self.image_search()
+            break
 
     def stop(self):
         self.power = False
@@ -109,10 +111,11 @@ class Image(QThread):
 
     def download(self,keyword,url,num):
         directory = self.folder
+        picture_type = str(self.picture_type)
         try:
             re = requests.get(url)
             if(re.status_code == 200):
-                with open(directory + keyword + '-' + str(num) + '.jpg', 'wb') as file:
+                with open(directory + keyword + '-' + str(num) + '.' + picture_type, 'wb') as file:
                     file.write(re.content)
             else:
                 return False
