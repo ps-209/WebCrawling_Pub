@@ -1,4 +1,4 @@
-import sys
+import sys,gc
 from PySide6.QtWidgets import *
 from asset.ui import Ui_MainWindow
 from threading import Thread
@@ -10,38 +10,45 @@ from asset.get_text_web import Web_Text
 class Main_window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(Main_window,self).__init__()
-        self.setFixedSize(491, 202)
+        self.setFixedSize(529, 400)
         self.work_thread = None
         self.setupUi(self)
         self.show()
         self.search_button.clicked.connect(self.directory)
-        self.photo_button.clicked.connect(self.image)
-        self.text_button.clicked.connect(self.text)
+        self.add_list.clicked.connect(self.adding_list)
+        self.start_button.clicked.connect(self.service_start)
 
     def SD(self): #버튼 비활성화
         self.search_button.setDisabled(True)
-        self.text_button.setDisabled(True)
-        self.photo_button.setDisabled(True)
         self.keyword_edit.setDisabled(True)
         self.directory_edit.setDisabled(True)
         self.comboBox.setDisabled(True)
+        self.add_list.setDisabled(True)
+        self.start_button.setDisabled(True)
+        self.pic_check.setDisabled(True)
+        self.sum_check.setDisabled(True)
+        self.picture_type.setDisabled(True)
+        self.sum_number.setDisabled(True)
 
     def SE(self): #버튼 활성화
         self.search_button.setEnabled(True)
-        self.text_button.setEnabled(True)
-        self.photo_button.setEnabled(True)
         self.keyword_edit.setEnabled(True)
         self.directory_edit.setEnabled(True)
         self.comboBox.setEnabled(True)
-    
-    def check_key(self):#웹사이트 == 1, 일반 키워드 == 0
+        self.add_list.setEnabled(True)
+        self.start_button.setEnabled(True)
+        self.pic_check.setEnabled(True)
+        self.sum_check.setEnabled(True)
+        self.picture_type.setEnabled(True)
+        self.sum_number.setEnabled(True)
+
+    def adding_list(self):
         content = self.keyword_edit.text()
-        sep1 = content.split(';')
-        sep2 = [i.strip() for i in sep1]
-        if("http" in sep2[0] or "html" in sep2[0]):
-            return 1
+        if(content == ''):
+            return
         else:
-            return 0
+            self.listWidget.addItem(str(content))
+            self.keyword_edit.setText("")
     
     def directory(self): #경로 설정
         direct = QFileDialog.getExistingDirectory(self)
@@ -54,26 +61,15 @@ class Main_window(QMainWindow, Ui_MainWindow):
         MBox.setText("Directory is confirmed")
         MBox.setIcon(QMessageBox.Information)
         MBox.exec()
-        
-    def image(self): #이미지
-        self.SD()
-        thread = Thread(target=self.img_search(self))
-        thread.start()
-        #여기서 self는 메인윈도우의 스레드 코드를 가지고 있으므로 넘겨줘야 창이 뜸
 
-    def img_search(self,main):
-        keyword = self.keyword_edit.text()
+    def img_search(self,key_list):
         directory = self.directory_edit.text() + '/'
-        if(not directory or not keyword):
-            main.AlartBox("Please fill empty parts!")
-            self.SE()
-            return
-        keylist = keyword.split(';')
+        picture_type = self.picture_type.currentText()
         count = int(self.comboBox.currentText())
-        self.progressBar.setMaximum(count * len(keylist))
+        self.progressBar.setMaximum(count * len(key_list))
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Image(keylist,count,directory)
+            self.work_thread = Image(key_list,count,directory,picture_type)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -83,34 +79,15 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.error("Error on Searching Image")
             self.SE()
             return
- 
-    def text(self): #텍스트
-        self.SD()
-        code = self.check_key()
-        if(code == 0):
-            thread = Thread(target=self.txt_search_keyword(self))
-            thread.start()
-        elif(code == 1):
-            thread = Thread(target=self.txt_search_web(self))
-            thread.start()
-        else:
-            self.SE()
-            self.AlartBox("keyword checking error")
     
-    def txt_search_keyword(self,main):
-        keyword = self.keyword_edit.text()
+    def txt_search_keyword(self,key_list):
         directory = self.directory_edit.text() + '/'
-        if(not directory or not keyword):
-            main.AlartBox("Please fill empty parts!")
-            self.SE()
-            return
-        
-        key_list = keyword.split(';')
         count = int(self.comboBox.currentText())
+        sum_number = self.sum_number.currentText()
         self.progressBar.setMaximum(count * len(key_list))
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Text(key_list,count,directory)
+            self.work_thread = Text(key_list,count,directory,sum_number)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -120,20 +97,13 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.error("Error on Searching Text")
             return
         
-    def txt_search_web(self,main):
-        url = self.keyword_edit.text()
+    def txt_search_web(self,url_list):
         directory = self.directory_edit.text() + '/'
-        if(not directory or not url):
-            main.AlartBox("Please fill empty parts!")
-            self.SE()
-            return
-        
-        site1 = url.split(';')
-        site2 = [i.strip() for i in site1]
-        self.progressBar.setMaximum(len(site2))
+        sum_number = self.sum_number.currentText()
+        self.progressBar.setMaximum(len(url_list))
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Web_Text(site2,directory)
+            self.work_thread = Web_Text(url_list,directory,sum_number)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -142,6 +112,38 @@ class Main_window(QMainWindow, Ui_MainWindow):
         except:
             self.error("Error on Crawling Text")
             return
+        
+    def service_start(self):
+        self.SD()
+        count = self.listWidget.count()
+        content_list = []
+        
+        for i in range(count):
+            content_list.append(self.listWidget.item(i).text())
+        if(self.blank_check(content_list)):
+            self.SE()
+            self.error("fill empty parts")
+            return
+        if(self.sum_check.isChecked() == True and self.pic_check.isChecked() == True):
+            self.error("Please check one")
+            self.SE()
+        elif(self.sum_check.isChecked() == True):
+            if("http" in content_list[0] or "html" in content_list[0]):
+                thread = Thread(target=self.txt_search_web(content_list))
+                thread.start()
+            else:
+                thread = Thread(target=self.txt_search_keyword(content_list))
+                thread.start()
+        elif(self.pic_check.isChecked() == True):
+            thread = Thread(target=self.img_search(content_list))
+            thread.start()
+
+    def blank_check(self,content):
+        directory = self.directory_edit.text()
+        if(directory == '' or content == ''):
+            return True
+        else:
+            return False
 
     def update_progress(self,value):
         self.progressBar.setValue(value)
@@ -150,10 +152,13 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.AlartBox(content)
 
     def ending(self,title,content):
-        self.CompleteBox(title,content)
         self.work_thread.stop()
-
+        self.CompleteBox(title,content)
+        self.listWidget.clear()
+        gc.collect()
+        
     def closeEvent(self,event):
+        gc.collect()
         if(self.work_thread and self.work_thread.isRunning()):
             self.work_thread.stop()
         event.accept()
@@ -174,7 +179,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         combox.exec()
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication()
 
     window = Main_window()
 
