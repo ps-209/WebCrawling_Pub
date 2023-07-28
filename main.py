@@ -1,5 +1,8 @@
-import sys,gc
+import sys,gc, time
 from PySide6.QtWidgets import *
+from PySide6.QtCore import *
+
+from multiprocessing import freeze_support
 from asset.ui import Ui_MainWindow
 from threading import Thread
 #사용자 파일
@@ -8,21 +11,23 @@ from asset.get_text import Text
 from asset.get_text_web import Web_Text
 
 class Main_window(QMainWindow, Ui_MainWindow):
+
     def __init__(self):
         super(Main_window,self).__init__()
         self.setFixedSize(529, 400)
         self.work_thread = None
         self.setupUi(self)
-        self.show()
+        self.tableWidget.setColumnWidth(0,self.tableWidget.width())
         self.search_button.clicked.connect(self.directory)
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
+        
 
     def SD(self): #버튼 비활성화
         self.search_button.setDisabled(True)
         self.keyword_edit.setDisabled(True)
         self.directory_edit.setDisabled(True)
-        self.comboBox.setDisabled(True)
+        self.amout_number.setDisabled(True)
         self.add_list.setDisabled(True)
         self.start_button.setDisabled(True)
         self.pic_check.setDisabled(True)
@@ -34,20 +39,22 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.search_button.setEnabled(True)
         self.keyword_edit.setEnabled(True)
         self.directory_edit.setEnabled(True)
-        self.comboBox.setEnabled(True)
+        self.amout_number.setEnabled(True)
         self.add_list.setEnabled(True)
         self.start_button.setEnabled(True)
         self.pic_check.setEnabled(True)
         self.sum_check.setEnabled(True)
         self.picture_type.setEnabled(True)
         self.sum_number.setEnabled(True)
+        
 
     def adding_list(self):
         content = self.keyword_edit.text()
         if(content == ''):
             return
         else:
-            self.listWidget.addItem(str(content))
+            self.tableWidget.insertRow(self.tableWidget.rowCount())
+            self.tableWidget.setItem(self.tableWidget.rowCount() - 1,int(0),QTableWidgetItem(content))
             self.keyword_edit.setText("")
     
     def directory(self): #경로 설정
@@ -65,7 +72,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def img_search(self,key_list):
         directory = self.directory_edit.text() + '/'
         picture_type = self.picture_type.currentText()
-        count = int(self.comboBox.currentText())
+        count = int(self.amout_number.currentText())
         self.progressBar.setMaximum(count * len(key_list))
         self.progressBar.setValue(0)
         try:
@@ -82,7 +89,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
     
     def txt_search_keyword(self,key_list):
         directory = self.directory_edit.text() + '/'
-        count = int(self.comboBox.currentText())
+        count = int(self.amout_number.currentText())
         sum_number = self.sum_number.currentText()
         self.progressBar.setMaximum(count * len(key_list))
         self.progressBar.setValue(0)
@@ -110,22 +117,25 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread.finished.connect(self.SE)
             self.work_thread.start()
         except:
-            self.error("Error on Crawling Text")
+            self.AlartBox("Error on Crawling Text")
             return
         
     def service_start(self):
         self.SD()
-        count = self.listWidget.count()
         content_list = []
         
-        for i in range(count):
-            content_list.append(self.listWidget.item(i).text())
+        for i in range(self.tableWidget.rowCount()):
+            tem_content = self.tableWidget.item(i,0).text()
+            if(tem_content):
+                content_list.append(tem_content)
+            else:
+                pass
         if(self.blank_check(content_list)):
             self.SE()
-            self.error("fill empty parts")
+            self.AlartBox("fill empty parts")
             return
         if(self.sum_check.isChecked() == True and self.pic_check.isChecked() == True):
-            self.error("Please check one")
+            self.AlartBox("Please check one")
             self.SE()
         elif(self.sum_check.isChecked() == True):
             if("http" in content_list[0] or "html" in content_list[0]):
@@ -154,15 +164,17 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def ending(self,title,content):
         self.work_thread.stop()
         self.CompleteBox(title,content)
-        self.listWidget.clear()
+        self.tableWidget.setRowCount(0)
         gc.collect()
         
+        
     def closeEvent(self,event):
-        gc.collect()
         if(self.work_thread and self.work_thread.isRunning()):
-            self.work_thread.stop()
+            try:
+                self.work_thread.stop()
+            except:
+                pass
         event.accept()
-        QApplication.quit()
 
     def AlartBox(self,content):
         alartbox = QMessageBox(self)
@@ -179,10 +191,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
         combox.exec()
 
 if __name__ == '__main__':
-    app = QApplication()
-
+    freeze_support()
+    app = QApplication(sys.argv)
+    
     window = Main_window()
-
+    window.show()
     sys.exit(app.exec())
 
 #새로운 스레드에서 함수를 시작하지 않으면 함수가 끝날 때까지 GUI가 멈추기 때문에
