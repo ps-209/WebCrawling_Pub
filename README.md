@@ -9,4 +9,4 @@ Adding features
 Error,Problem
  1. error on searching image - solved
  2. error on without console in exe - solved
- 3. When turn off, Still remain in process - Natural language processing issues
+ 3. When turn off, Still remain in process - Threading issue(solved)
