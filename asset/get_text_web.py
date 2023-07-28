@@ -1,7 +1,8 @@
-import requests, re
+import requests, re, gc
 from PySide6.QtCore import *
 from asset.summarize_v3 import summarize
 from newspaper import Article
+import multiprocessing
 
 class Web_Text(QThread):
     progress_updated = Signal(int)
@@ -10,6 +11,7 @@ class Web_Text(QThread):
 
     def __init__(self, sites, folder,sum_number):
         super(Web_Text,self).__init__()
+        multiprocessing.freeze_support()
         self.sites = sites
         self.folder = folder
         self.sum_number = sum_number
@@ -71,21 +73,31 @@ class Web_Text(QThread):
                     if(language == 'unknown'):
                         collection.append(i + '\nPage Language Error\n')
                     else:
-                        summarized = summarize(language,contents,0.85,sum_number)
-                        if(summarized == '001'):
+                        
+                        pool = multiprocessing.Pool(processes=4)
+                        converted_page = pool.apply_async(summarize,args=[language, contents, 0.85, sum_number])
+                        converted_page = str(converted_page.get())
+                        pool.close()
+                        pool.join()
+
+                        #summarized = summarize(language,contents,0.85,sum_number)
+                        if(converted_page == '001'):
                             self.error_occur.emit("package lost")
                             collection.append(i + '\nFailed By Package Lost\n')
-                        elif(summarized == '002'):
+                        elif(converted_page == '002'):
                             collection.append(i + '\nFailed to Vectorize text\n')
-                        elif(summarized == '004'):
+                        elif(converted_page == '004'):
                             collection.append(i + '\nFailed to summarize\n')
                         else:
-                            collection.append(i + '\n' + summarized + '\n')
+                            collection.append(i + '\n' + converted_page + '\n')
                 num += 1
                 self.progress_updated.emit(num)
             self.save_text(num,folder)
-        self.process_complete.emit("Crawling Ended","Web Text Crawling ended\n Total {}".format(num))
         self.power = False
+        del collection
+        gc.collect()
+        self.process_complete.emit("Crawling Ended","Web Text Crawling ended\n Total {}".format(num))
+        
 
     def run(self):
         while(self.power):
@@ -95,3 +107,4 @@ class Web_Text(QThread):
         self.power = False
         self.quit()
         self.wait(3000)
+

@@ -1,7 +1,8 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from konlpy.tag import Okt
-import re
+import re, gc, sys
 import numpy as np
+from nltk import sent_tokenize
 
 eng_words = set()
 kor_words = set()
@@ -26,8 +27,7 @@ def wording(language):
 def Eng(original_text,point = 0.85,num = 2):
     #문장 분리
     text = re.sub(r'\[.*?\]|\(.*?\)', '', original_text)
-    pattern = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!|\n)\s'
-    separated_text = re.split(pattern, text)
+    separated_text = sent_tokenize(text,'english')
     #소문자
     lower_text = [s.lower() for s in separated_text]
     #불용어 및 문장부호 제거
@@ -48,14 +48,24 @@ def Eng(original_text,point = 0.85,num = 2):
         T_matrix = TfidfVectorizer().fit_transform(preprocessed_text).toarray()
         graph_text = np.dot(T_matrix, T_matrix.T)
     except:
-        return '002'
+        result = '002'
+        gc.collect()
+        return result
 
     ranked_text = ranking(graph_text, point) #포인트
     sorted_rank = sorted(ranked_text, key=lambda k: ranked_text[k], reverse=True)
 
+    del graph_text
+    del T_matrix
+
     summary = [separated_text[i] for i in sorted_rank[:num]]
 
-    return '\n'.join(summary)
+    del ranked_text
+    del sorted_rank
+    
+    result = '\n'.join(summary)
+    gc.collect()
+    return result
 
 def Kor(original_text,point = 0.85,num = 2):
     okt = Okt()
@@ -76,14 +86,24 @@ def Kor(original_text,point = 0.85,num = 2):
         T_matrix = TfidfVectorizer().fit_transform(preprocessed_text).toarray()
         graph_text = np.dot(T_matrix, T_matrix.T)
     except:
-        return '002'
+        result = '002'
+        gc.collect()
+        return result
 
     ranked_text = ranking(graph_text, point) #포인트
     sorted_rank = sorted(ranked_text, key=lambda k: ranked_text[k], reverse=True)
 
+    del graph_text
+    del T_matrix
+
     summary = [cleaned_text[i] for i in sorted_rank[:num]]
 
-    return '\n'.join(summary)
+    del ranked_text
+    del sorted_rank
+    
+    result = '\n'.join(summary)
+    gc.collect()
+    return result
 
 #문장 순위 정리
 def ranking(graph, point):
@@ -109,18 +129,16 @@ def summarize(language, original_text, point, number):
     else:
         wording(language)
         if(language == 'ko'):
-            processed_text_list = Kor(original_text,point,number)
-            return processed_text_list
+            return Kor(original_text,point,number)
         elif(language == 'en'):
-            processed_text_list = Eng(original_text,point,number)
-            return processed_text_list
+            return Eng(original_text,point,number)
         else:
             return '004'
 
 if __name__ == '__main__':
 
     sentence = "sample"
-    sentence2 = """샘플 텍스트"""
+    sentence2 = """안녕하세요. 오늘은 날이 참 좋네요. 만나서 방가웠습니다. 안녕히가세요."""
     sentence3 = """sample"""
-    answer = summarize('ko',sentence2,0.85,5)
+    answer = summarize('ko',sentence2,0.85,2)
     print(answer)

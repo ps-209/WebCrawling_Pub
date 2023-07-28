@@ -1,8 +1,9 @@
-import requests, re
+import requests, re, sys, gc
 from bs4 import BeautifulSoup
 from newspaper import Article
 from asset.summarize_v3 import summarize
 from PySide6.QtCore import *
+import multiprocessing
 
 class Text(QThread):
     progress_updated = Signal(int)
@@ -11,6 +12,7 @@ class Text(QThread):
 
     def __init__(self, keyword, number, folder,sum_number):
         super(Text,self).__init__()
+        multiprocessing.freeze_support()
         self.keyword = keyword
         self.number = number
         self.folder = folder
@@ -105,7 +107,11 @@ class Text(QThread):
                             count += 1
                             continue
 
-                        converted_page = summarize(language, original_page, 0.85, sum_number)
+                        pool = multiprocessing.Pool(processes=4)
+                        converted_page = pool.apply_async(summarize,args=[language, original_page, 0.85, sum_number])
+                        converted_page = str(converted_page.get())
+                        pool.close()
+                        pool.join()
 
                         if(converted_page == '001'):
                             #패키지 감지 실패시 경고
@@ -121,6 +127,7 @@ class Text(QThread):
                             continue
 
                         contents.append(title[success] + ' : ' + search_link + '\n' + converted_page + '\n')
+                        converted_page = None
                         count += 1
                         success += 1
                         total_count += 1
@@ -128,18 +135,18 @@ class Text(QThread):
                 #크롤링 종료 후 저장
                 self.save_text(key,contents,success,folder)
                 key_word_check += 1
+        del contents
+        gc.collect()
         self.process_complete.emit("Crawling Ended","Text Crawling ended\n Total {}".format(total_count))
         self.power = False
 
     def run(self):
         while(self.power):
             self.get_text()
-            break
     
     def stop(self):
         self.power = False
-        self.quit()
-        self.wait(3000)
+        self.terminate()
         
 
 
