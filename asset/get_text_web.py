@@ -1,8 +1,9 @@
-import requests, re, gc
+import requests, re, gc, bs4
 from PySide6.QtCore import *
 from asset.summarize_v3 import summarize
 from newspaper import Article
 import multiprocessing
+
 
 class Web_Text(QThread):
     progress_updated = Signal(int)
@@ -36,6 +37,18 @@ class Web_Text(QThread):
                 return article.text
         except:
             return '01'
+        # try:
+        #     response = requests.get(site)
+        #     soup = bs4.BeautifulSoup(response.content,'html.parser')
+        #     text_list = soup.find_all(text=True)
+        #     text = ''
+        #     if(text_list == '' or len(text_list) == 0):
+        #         return '01'
+        #     for i in text_list:
+        #         text + str(i)
+        #     return text
+        # except:
+        #     return '01'
 
     def language_detection(self,text):
         korean = re.search(r'[\u3131-\u3163\uac00-\ud7a3]+', text)
@@ -74,7 +87,7 @@ class Web_Text(QThread):
                         collection.append(i + '\nPage Language Error\n')
                     else:
                         
-                        pool = multiprocessing.Pool(processes=4)
+                        pool = multiprocessing.Pool(processes=2)
                         converted_page = pool.apply_async(summarize,args=[language, contents, 0.85, sum_number])
                         converted_page = str(converted_page.get())
                         pool.close()

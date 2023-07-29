@@ -146,7 +146,8 @@ class Text(QThread):
     
     def stop(self):
         self.power = False
-        self.terminate()
+        self.quit()
+        self.wait(3000)
         
 
 
