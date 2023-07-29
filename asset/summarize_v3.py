@@ -1,8 +1,9 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from konlpy.tag import Okt
-import re, gc, sys
+import re, gc
 import numpy as np
-from nltk import sent_tokenize
+from nltk import word_tokenize, sent_tokenize
+
 
 eng_words = set()
 kor_words = set()
@@ -24,23 +25,33 @@ def wording(language):
         with open(r"words\eng_word.txt", 'r', encoding='UTF-8') as f:
             eng_words.update(line.strip() for line in f)
 
+def split_sentence(text):
+    #문장 분리 -> 리스트 형태로
+    #부가 설명등 괄호,기호 제거
+    sent = sent_tokenize(text)
+    sent2 = [re.sub(r"\n+", " ", s) for s in sent]
+    sent2 = [re.sub(r'\([^()]*\)|\[\d+\]', '', t) for t in sent2]
+    return sent2
+
 def Eng(original_text,point = 0.85,num = 2):
     #문장 분리
-    text = re.sub(r'\[.*?\]|\(.*?\)', '', original_text)
-    separated_text = sent_tokenize(text,'english')
-    #소문자
-    lower_text = [s.lower() for s in separated_text]
+    cleaned_text = split_sentence(original_text)
+    lower_text = [s.lower() for s in cleaned_text]
+    
     #불용어 및 문장부호 제거
     clean_text = []
     for sentence in lower_text:
-        clean_sentence = re.sub(r'[^\w\s]', '', sentence)
-        tokens = clean_sentence.split()
+        if(sentence == "" or len(sentence) == 0):
+            continue
+        tokens = sentence.split()
         tokens = [token for token in tokens if token not in eng_words]
         clean_sentence = ' '.join(tokens)
+        clean_sentence = re.sub(r"[.,?!]", " ", clean_sentence)
         clean_text.append(clean_sentence)
-    #토큰화
-    tokenized_text = [re.findall(r'\b\w+\b',sentence) for sentence in clean_text]
 
+    #토큰화
+    tokenized_text = [word_tokenize(s,language="english") for s in clean_text]
+    
     #다시 문장 구성
     preprocessed_text = [' '.join(tokens) for tokens in tokenized_text]
     
@@ -58,7 +69,7 @@ def Eng(original_text,point = 0.85,num = 2):
     del graph_text
     del T_matrix
 
-    summary = [separated_text[i] for i in sorted_rank[:num]]
+    summary = [cleaned_text[i] for i in sorted_rank[:num]]
 
     del ranked_text
     del sorted_rank
@@ -69,14 +80,13 @@ def Eng(original_text,point = 0.85,num = 2):
 
 def Kor(original_text,point = 0.85,num = 2):
     okt = Okt()
-    #문장 분리 -> 리스트 형태로
-    separated_text = re.split(r'[.!?]+', original_text)
-    tokened = [s.strip() for s in separated_text if s.strip()]
-    #기호 제거
-    cleaned_text = [re.sub(r'\([^()]*\)|\[\d+\]', '', t) for t in tokened]
+    
+    cleaned_text = split_sentence(original_text)
     
     preprocessed_text = []
     for sentence in cleaned_text:
+        if(sentence == "" or len(sentence) == 0):
+            continue
         nouns = okt.nouns(sentence)
         filtered_text = [noun for noun in nouns if noun not in kor_words]
         preprocessed_text.append(' '.join(filtered_text))
@@ -100,7 +110,7 @@ def Kor(original_text,point = 0.85,num = 2):
 
     del ranked_text
     del sorted_rank
-    
+
     result = '\n'.join(summary)
     gc.collect()
     return result
@@ -137,8 +147,9 @@ def summarize(language, original_text, point, number):
 
 if __name__ == '__main__':
 
-    sentence = "sample"
-    sentence2 = """안녕하세요. 오늘은 날이 참 좋네요. 만나서 방가웠습니다. 안녕히가세요."""
-    sentence3 = """sample"""
-    answer = summarize('ko',sentence2,0.85,2)
+    sentence = """"""
+    sentence2 = """"""
+    sentence3 = """"""
+    answer = summarize('ko',sentence3,0.85,5)
+
     print(answer)
