@@ -5,6 +5,7 @@ Adding features
  1. progress bar - completed
  2. finished alarm - completed
  3. make into exe file - completed(total 360mb)
+ 4. site image crawling
 
 Error,Problem
  1. error on searching image - solved
