@@ -28,10 +28,10 @@ def wording(language):
 def split_sentence(text):
     #문장 분리 -> 리스트 형태로
     #부가 설명등 괄호,기호 제거
-    sent = sent_tokenize(text)
-    sent2 = [re.sub(r"\n+", " ", s) for s in sent]
-    sent2 = [re.sub(r'\([^()]*\)|\[\d+\]', '', t) for t in sent2]
-    return sent2
+    sent1 = re.split(r'[\n.?!]', text)
+    sent2 = [re.sub(r'\([^()]*\)|\[\d+\]', '', t) for t in sent1]
+    sent3 = [s.strip() for s in sent2 if s.strip()]
+    return sent3
 
 def Eng(original_text,point = 0.85,num = 2):
     #문장 분리
@@ -70,7 +70,7 @@ def Eng(original_text,point = 0.85,num = 2):
     del T_matrix
 
     summary = [cleaned_text[i] for i in sorted_rank[:num]]
-
+    summary = [s + '.' for s in summary]
     del ranked_text
     del sorted_rank
     
@@ -80,7 +80,7 @@ def Eng(original_text,point = 0.85,num = 2):
 
 def Kor(original_text,point = 0.85,num = 2):
     okt = Okt()
-    
+
     cleaned_text = split_sentence(original_text)
     
     preprocessed_text = []
@@ -111,6 +111,7 @@ def Kor(original_text,point = 0.85,num = 2):
     del ranked_text
     del sorted_rank
 
+    summary = [s + '.' for s in summary]
     result = '\n'.join(summary)
     gc.collect()
     return result
