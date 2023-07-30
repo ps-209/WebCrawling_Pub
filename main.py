@@ -1,4 +1,4 @@
-import sys,gc, time
+import sys,gc
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 
@@ -6,7 +6,7 @@ from multiprocessing import freeze_support
 from asset.ui import Ui_MainWindow
 from threading import Thread
 #사용자 파일
-from asset.get_image import Image
+from asset.get_image_integrated import Image
 from asset.get_text_integrated import Text
 class Main_window(QMainWindow, Ui_MainWindow):
 
@@ -44,7 +44,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.picture_type.setEnabled(True)
         self.sum_number.setEnabled(True)
         
-
     def adding_list(self):
         content = self.keyword_edit.text()
         if(content == ''):
@@ -66,14 +65,20 @@ class Main_window(QMainWindow, Ui_MainWindow):
         MBox.setIcon(QMessageBox.Information)
         MBox.exec()
 
-    def img_search(self,key_list):
+    def img_search(self,target):
         directory = self.directory_edit.text() + '/'
         picture_type = self.picture_type.currentText()
         count = int(self.amout_number.currentText())
-        self.progressBar.setMaximum(count * len(key_list))
+        total = int(0)
+        for i in target:
+            if("http" in i or "html" in i):
+                total += 1
+            else:
+                total += count
+        self.progressBar.setMaximum(total)
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Image(key_list,count,directory,picture_type)
+            self.work_thread = Image(target,count,directory,picture_type)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
