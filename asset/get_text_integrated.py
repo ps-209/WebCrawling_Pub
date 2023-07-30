@@ -20,7 +20,7 @@ class Text(QThread):
         self.progress_count = 0
         self.power = True
 
-    def internet(self):
+    def get_internet(self):
         re = requests.get("https://google.com")
         if(re.status_code != 200):
             self.error_occur.emit("lost internet connection")
@@ -148,7 +148,7 @@ class Text(QThread):
 
     def switching(self):
         target = self.target #리스트 형태로 존재
-        if(self.internet == False):
+        if(self.get_internet == False):
             return
         for i in target:
             if("http" in i or "html" in i):
