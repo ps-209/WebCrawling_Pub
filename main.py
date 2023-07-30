@@ -7,9 +7,7 @@ from asset.ui import Ui_MainWindow
 from threading import Thread
 #사용자 파일
 from asset.get_image import Image
-from asset.get_text import Text
-from asset.get_text_web import Web_Text
-
+from asset.get_text_integrated import Text
 class Main_window(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
@@ -21,7 +19,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.search_button.clicked.connect(self.directory)
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
-        
 
     def SD(self): #버튼 비활성화
         self.search_button.setDisabled(True)
@@ -87,14 +84,20 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.SE()
             return
     
-    def txt_search_keyword(self,key_list):
+    def txt_search_integrated(self,target):
         directory = self.directory_edit.text() + '/'
         count = int(self.amout_number.currentText())
         sum_number = self.sum_number.currentText()
-        self.progressBar.setMaximum(count * len(key_list))
+        total = 0
+        for i in target:
+            if("http" in i or "html" in i):
+                total += 1
+            else:
+                total += count
+        self.progressBar.setMaximum(total)
         self.progressBar.setValue(0)
         try:
-            self.work_thread = Text(key_list,count,directory,sum_number)
+            self.work_thread = Text(target,count,directory,sum_number)
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
@@ -103,23 +106,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         except:
             self.error("Error on Searching Text")
             return
-        
-    def txt_search_web(self,url_list):
-        directory = self.directory_edit.text() + '/'
-        sum_number = self.sum_number.currentText()
-        self.progressBar.setMaximum(len(url_list))
-        self.progressBar.setValue(0)
-        try:
-            self.work_thread = Web_Text(url_list,directory,sum_number)
-            self.work_thread.progress_updated.connect(self.update_progress)
-            self.work_thread.error_occur.connect(self.error)
-            self.work_thread.process_complete.connect(self.ending)
-            self.work_thread.finished.connect(self.SE)
-            self.work_thread.start()
-        except:
-            self.AlartBox("Error on Crawling Text")
-            return
-        
+
     def service_start(self):
         self.SD()
         content_list = []
@@ -138,12 +125,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.AlartBox("Please check one")
             self.SE()
         elif(self.sum_check.isChecked() == True):
-            if("http" in content_list[0] or "html" in content_list[0]):
-                thread = Thread(target=self.txt_search_web(content_list))
-                thread.start()
-            else:
-                thread = Thread(target=self.txt_search_keyword(content_list))
-                thread.start()
+            thread = Thread(target=self.txt_search_integrated(content_list))
+            thread.start()
         elif(self.pic_check.isChecked() == True):
             thread = Thread(target=self.img_search(content_list))
             thread.start()
