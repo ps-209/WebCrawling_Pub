@@ -56,12 +56,17 @@ class Text(QThread):
 
     def multiprocess(self,language,content):
         sum_number = int(self.sum_number)
-        pool = multiprocessing.Pool(processes=2)
-        converted_page = pool.apply_async(summarize,args=[language, content, 0.85, sum_number])
-        converted = str(converted_page.get())
-        pool.close()
-        pool.join()
-        return converted
+        if(sum_number == int(0)):
+            converted = re.split(r'[\n.?!]', content)
+            converted = [s.strip() for s in converted if s.strip()]
+            return '\n'.join(converted)
+        else:
+            pool = multiprocessing.Pool(processes=2)
+            converted_page = pool.apply_async(summarize,args=[language, content, 0.85, sum_number])
+            converted = str(converted_page.get())
+            pool.close()
+            pool.join()
+            return converted
 
     def keyword_crawling(self,keyword):
         number  = int(self.number) #키워드 당 구해야하는 개수
@@ -149,6 +154,7 @@ class Text(QThread):
     def switching(self):
         target = self.target #리스트 형태로 존재
         if(self.get_internet == False):
+            self.power = False
             return
         for i in target:
             if("http" in i or "html" in i):

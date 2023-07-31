@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import time, requests
-import os, logging
+import os, logging, bs4
 from PySide6.QtCore import *
 
 class Image(QThread):
@@ -23,6 +23,7 @@ class Image(QThread):
     def switching(self):
         target = self.target
         if(self.get_internet == False):
+            self.power = False
             return
         for i in target:
             if("http" in i or "html" in i):
@@ -45,6 +46,15 @@ class Image(QThread):
         self.wait(3000)
 
     def site_image(self,site):
+        response = requests.get(site)
+        soup = bs4.BeautifulSoup(response.text,'html.parser')
+        img_num = int(0)
+        for tag in soup.find_all('img'):
+            src = tag.get('src')
+            if(src):
+                self.download("Site-Image",src,img_num) #이미지 최소 용량 설정 -> 쓸데없는 이미지 다운 방지?
+                img_num += 1
+
         self.progress_count += 1
         self.progress_updated.emit(self.progress_count)
 

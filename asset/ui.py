@@ -15,18 +15,17 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHeaderView,
-    QLabel, QLineEdit, QMainWindow, QProgressBar,
-    QPushButton, QSizePolicy, QTableWidget, QTableWidgetItem,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QHeaderView, QLabel,
+    QLineEdit, QMainWindow, QProgressBar, QPushButton,
+    QSizePolicy, QTableWidget, QTableWidgetItem, QWidget)
 import asset.resource_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(531, 401)
-        MainWindow.setMaximumSize(QSize(529, 400))
+        MainWindow.resize(532, 402)
+        MainWindow.setMaximumSize(QSize(800, 800))
         font = QFont()
         font.setPointSize(10)
         MainWindow.setFont(font)
@@ -52,7 +51,7 @@ class Ui_MainWindow(object):
         self.amout_number.addItem("")
         self.amout_number.addItem("")
         self.amout_number.setObjectName(u"amout_number")
-        self.amout_number.setGeometry(QRect(80, 280, 69, 31))
+        self.amout_number.setGeometry(QRect(90, 280, 69, 31))
         self.amout_number.setFont(font)
         self.directory_edit = QLineEdit(self.centralwidget)
         self.directory_edit.setObjectName(u"directory_edit")
@@ -74,32 +73,26 @@ class Ui_MainWindow(object):
         self.label_3.setGeometry(QRect(10, 240, 35, 35))
         self.label_3.setPixmap(QPixmap(u":/icon/icon/file_icon.png"))
         self.label_3.setScaledContents(True)
-        self.sum_check = QCheckBox(self.centralwidget)
-        self.sum_check.setObjectName(u"sum_check")
-        self.sum_check.setGeometry(QRect(340, 280, 16, 31))
-        self.sum_check.setChecked(True)
         self.label_4 = QLabel(self.centralwidget)
         self.label_4.setObjectName(u"label_4")
-        self.label_4.setGeometry(QRect(360, 280, 81, 31))
-        self.sum_number = QComboBox(self.centralwidget)
-        self.sum_number.addItem("")
-        self.sum_number.addItem("")
-        self.sum_number.addItem("")
-        self.sum_number.setObjectName(u"sum_number")
-        self.sum_number.setGeometry(QRect(451, 280, 69, 31))
-        self.sum_number.setFont(font)
+        self.label_4.setGeometry(QRect(350, 280, 91, 31))
+        self.add_opt = QComboBox(self.centralwidget)
+        self.add_opt.addItem("")
+        self.add_opt.addItem("")
+        self.add_opt.addItem("")
+        self.add_opt.addItem("")
+        self.add_opt.setObjectName(u"add_opt")
+        self.add_opt.setGeometry(QRect(449, 280, 71, 31))
+        self.add_opt.setFont(font)
         self.label_5 = QLabel(self.centralwidget)
         self.label_5.setObjectName(u"label_5")
-        self.label_5.setGeometry(QRect(190, 280, 51, 31))
-        self.picture_type = QComboBox(self.centralwidget)
-        self.picture_type.addItem("")
-        self.picture_type.addItem("")
-        self.picture_type.setObjectName(u"picture_type")
-        self.picture_type.setGeometry(QRect(250, 280, 69, 31))
-        self.picture_type.setFont(font)
-        self.pic_check = QCheckBox(self.centralwidget)
-        self.pic_check.setObjectName(u"pic_check")
-        self.pic_check.setGeometry(QRect(170, 287, 16, 20))
+        self.label_5.setGeometry(QRect(180, 280, 51, 31))
+        self.option_select = QComboBox(self.centralwidget)
+        self.option_select.addItem("")
+        self.option_select.addItem("")
+        self.option_select.setObjectName(u"option_select")
+        self.option_select.setGeometry(QRect(250, 280, 81, 31))
+        self.option_select.setFont(font)
         self.start_button = QPushButton(self.centralwidget)
         self.start_button.setObjectName(u"start_button")
         self.start_button.setGeometry(QRect(10, 320, 511, 41))
@@ -123,7 +116,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.sum_number.setCurrentIndex(1)
+        self.add_opt.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -133,7 +126,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"WebCrawling", None))
         self.search_button.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">KeyWord</span></p></body></html>", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Amount</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Amount</span></p></body></html>", None))
         self.amout_number.setItemText(0, QCoreApplication.translate("MainWindow", u"1", None))
         self.amout_number.setItemText(1, QCoreApplication.translate("MainWindow", u"3", None))
         self.amout_number.setItemText(2, QCoreApplication.translate("MainWindow", u"5", None))
@@ -142,18 +135,17 @@ class Ui_MainWindow(object):
 
         self.add_list.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.label_3.setText("")
-        self.sum_check.setText("")
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Summarize</span></p></body></html>", None))
-        self.sum_number.setItemText(0, QCoreApplication.translate("MainWindow", u"3", None))
-        self.sum_number.setItemText(1, QCoreApplication.translate("MainWindow", u"5", None))
-        self.sum_number.setItemText(2, QCoreApplication.translate("MainWindow", u"7", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Summarize</span></p></body></html>", None))
+        self.add_opt.setItemText(0, QCoreApplication.translate("MainWindow", u"0", None))
+        self.add_opt.setItemText(1, QCoreApplication.translate("MainWindow", u"3", None))
+        self.add_opt.setItemText(2, QCoreApplication.translate("MainWindow", u"5", None))
+        self.add_opt.setItemText(3, QCoreApplication.translate("MainWindow", u"7", None))
 
-        self.sum_number.setCurrentText(QCoreApplication.translate("MainWindow", u"5", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Picture</span></p></body></html>", None))
-        self.picture_type.setItemText(0, QCoreApplication.translate("MainWindow", u"png", None))
-        self.picture_type.setItemText(1, QCoreApplication.translate("MainWindow", u"jpg", None))
+        self.add_opt.setCurrentText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-size:11pt;\">Option</span></p></body></html>", None))
+        self.option_select.setItemText(0, QCoreApplication.translate("MainWindow", u"Text", None))
+        self.option_select.setItemText(1, QCoreApplication.translate("MainWindow", u"Picture", None))
 
-        self.pic_check.setText("")
         self.start_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"KeyList", None));
