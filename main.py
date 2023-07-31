@@ -1,7 +1,6 @@
 import sys,gc
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
-
 from multiprocessing import freeze_support
 from asset.ui import Ui_MainWindow
 from threading import Thread
@@ -19,6 +18,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.search_button.clicked.connect(self.directory)
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
+        self.option_select.currentIndexChanged.connect(self.setting_option)
 
     def SD(self): #버튼 비활성화
         self.search_button.setDisabled(True)
@@ -27,10 +27,8 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.amout_number.setDisabled(True)
         self.add_list.setDisabled(True)
         self.start_button.setDisabled(True)
-        self.pic_check.setDisabled(True)
-        self.sum_check.setDisabled(True)
-        self.picture_type.setDisabled(True)
-        self.sum_number.setDisabled(True)
+        self.option_select.setDisabled(True)
+        self.add_opt.setDisabled(True)
 
     def SE(self): #버튼 활성화
         self.search_button.setEnabled(True)
@@ -39,11 +37,21 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.amout_number.setEnabled(True)
         self.add_list.setEnabled(True)
         self.start_button.setEnabled(True)
-        self.pic_check.setEnabled(True)
-        self.sum_check.setEnabled(True)
-        self.picture_type.setEnabled(True)
-        self.sum_number.setEnabled(True)
-        
+        self.option_select.setEnabled(True)
+        self.add_opt.setEnabled(True)
+
+    def setting_option(self):
+        if(self.option_select.currentText() == "Text"):
+            self.add_opt.clear()
+            self.add_opt.addItems(["0", "3", "5", "7"])
+            self.add_opt.setCurrentIndex(3)
+            self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Summarize</span></p></body></html>", None))
+        else:
+            self.add_opt.clear()
+            self.add_opt.addItems(["png", "jpg"])
+            self.add_opt.setCurrentIndex(0)
+            self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Pic-Type</span></p></body></html>", None))
+
     def adding_list(self):
         content = self.keyword_edit.text()
         if(content == ''):
@@ -65,9 +73,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
         MBox.setIcon(QMessageBox.Information)
         MBox.exec()
 
-    def img_search(self,target):
+    def img_search_integrated(self,target):
         directory = self.directory_edit.text() + '/'
-        picture_type = self.picture_type.currentText()
+        picture_type = self.add_opt.currentText()
         count = int(self.amout_number.currentText())
         total = int(0)
         for i in target:
@@ -92,7 +100,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
     def txt_search_integrated(self,target):
         directory = self.directory_edit.text() + '/'
         count = int(self.amout_number.currentText())
-        sum_number = self.sum_number.currentText()
+        sum_number = int(self.add_opt.currentText())
         total = 0
         for i in target:
             if("http" in i or "html" in i):
@@ -126,14 +134,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.SE()
             self.AlartBox("fill empty parts")
             return
-        if(self.sum_check.isChecked() == True and self.pic_check.isChecked() == True):
-            self.AlartBox("Please check one")
-            self.SE()
-        elif(self.sum_check.isChecked() == True):
+        if(self.option_select.currentText() == "Text"):
             thread = Thread(target=self.txt_search_integrated(content_list))
             thread.start()
-        elif(self.pic_check.isChecked() == True):
-            thread = Thread(target=self.img_search(content_list))
+        elif(self.option_select.currentText() == "Picture"):
+            thread = Thread(target=self.img_search_integrated(content_list))
             thread.start()
 
     def blank_check(self,content):
@@ -154,7 +159,6 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.CompleteBox(title,content)
         self.tableWidget.setRowCount(0)
         gc.collect()
-        
         
     def closeEvent(self,event):
         if(self.work_thread and self.work_thread.isRunning()):
