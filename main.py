@@ -1,4 +1,4 @@
-import sys,gc
+import sys,gc, time
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from multiprocessing import freeze_support
@@ -20,7 +20,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.start_button.clicked.connect(self.service_start)
         self.option_select.currentIndexChanged.connect(self.setting_option)
 
-    def SD(self): #버튼 비활성화
+    def button_state_off(self): #버튼 오프
         self.search_button.setDisabled(True)
         self.keyword_edit.setDisabled(True)
         self.directory_edit.setDisabled(True)
@@ -30,7 +30,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.option_select.setDisabled(True)
         self.add_opt.setDisabled(True)
 
-    def SE(self): #버튼 활성화
+    def button_state_on(self): #버튼 온
         self.search_button.setEnabled(True)
         self.keyword_edit.setEnabled(True)
         self.directory_edit.setEnabled(True)
@@ -40,19 +40,19 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.option_select.setEnabled(True)
         self.add_opt.setEnabled(True)
 
-    def setting_option(self):
+    def setting_option(self): #텍스트, 사진 설정
         if(self.option_select.currentText() == "Text"):
             self.add_opt.clear()
             self.add_opt.addItems(["0", "3", "5", "7"])
-            self.add_opt.setCurrentIndex(3)
-            self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Summarize</span></p></body></html>", None))
+            self.add_opt.setCurrentIndex(2)
+            self.label_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Summarize</span></p></body></html>", None))
         else:
             self.add_opt.clear()
             self.add_opt.addItems(["png", "jpg"])
             self.add_opt.setCurrentIndex(0)
-            self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Pic-Type</span></p></body></html>", None))
+            self.label_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt;\">Pic-Type</span></p></body></html>", None))
 
-    def adding_list(self):
+    def adding_list(self): #목표 리스트에 추가
         content = self.keyword_edit.text()
         if(content == ''):
             return
@@ -60,8 +60,9 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.tableWidget.insertRow(self.tableWidget.rowCount())
             self.tableWidget.setItem(self.tableWidget.rowCount() - 1,int(0),QTableWidgetItem(content))
             self.keyword_edit.setText("")
+
     
-    def directory(self): #경로 설정
+    def directory(self): #파일 경로 설정
         direct = QFileDialog.getExistingDirectory(self)
         self.directory_edit.setText(direct)
         if(not direct):
@@ -90,11 +91,11 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
-            self.work_thread.finished.connect(self.SE)
+            self.work_thread.finished.connect(self.button_state_on)
             self.work_thread.start()
         except:
             self.error("Error on Searching Image")
-            self.SE()
+            self.button_state_on()
             return
     
     def txt_search_integrated(self,target):
@@ -114,27 +115,29 @@ class Main_window(QMainWindow, Ui_MainWindow):
             self.work_thread.progress_updated.connect(self.update_progress)
             self.work_thread.error_occur.connect(self.error)
             self.work_thread.process_complete.connect(self.ending)
-            self.work_thread.finished.connect(self.SE)
+            self.work_thread.finished.connect(self.button_state_on)
             self.work_thread.start()
         except:
             self.error("Error on Searching Text")
+            self.button_state_on()
             return
 
     def service_start(self):
-        self.SD()
+        self.button_state_off()
         content_list = []
-        
+        content_list.clear()
+        self.work_thread = None
         for i in range(self.tableWidget.rowCount()):
             tem_content = self.tableWidget.item(i,0).text()
             if(tem_content):
                 content_list.append(tem_content)
             else:
                 pass
-        if(self.blank_check(content_list)):
-            self.SE()
+        if(self.blank_check(content_list) == True):
+            self.button_state_on()
             self.AlartBox("fill empty parts")
             return
-        if(self.option_select.currentText() == "Text"):
+        elif(self.option_select.currentText() == "Text"):
             thread = Thread(target=self.txt_search_integrated(content_list))
             thread.start()
         elif(self.option_select.currentText() == "Picture"):
@@ -143,7 +146,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def blank_check(self,content):
         directory = self.directory_edit.text()
-        if(directory == '' or content == ''):
+        if(directory == '' or len(content) == 0):
             return True
         else:
             return False
