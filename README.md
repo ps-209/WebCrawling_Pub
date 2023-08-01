@@ -4,7 +4,7 @@ for somewhat finished code
 Adding features
  1. progress bar - completed
  2. finished alarm - completed
- 3. make into exe file - completed(total 360mb, 140mb - slow one file)
+ 3. make into exe file - completed(total 220mb - 3sec, 140mb - 6sec)
  4. site image crawling - completed
 
 Error,Problem
