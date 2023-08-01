@@ -12,7 +12,6 @@ class Text(QThread):
 
     def __init__(self, target, number, folder,sum_number):
         super(Text,self).__init__()
-        multiprocessing.freeze_support()
         self.target = target
         self.number = number
         self.folder = folder
@@ -51,8 +50,11 @@ class Text(QThread):
             return 'unknown'
 
     def save_text(self,key_word,contents,folder_directory):
-        with open(folder_directory + key_word + '.txt','w', encoding='utf-8') as file:
-            file.write(str(contents))
+        try:
+            with open(folder_directory + key_word + '.txt','w', encoding='utf-8') as file:
+                file.write(str(contents))
+        except:
+            pass
 
     def multiprocess(self,language,content):
         sum_number = int(self.sum_number)
@@ -171,5 +173,7 @@ class Text(QThread):
     
     def stop(self):
         self.power = False
-        self.quit()
-        self.wait(3000)
+        self.terminate()
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()

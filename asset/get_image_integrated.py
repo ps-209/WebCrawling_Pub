@@ -42,8 +42,7 @@ class Image(QThread):
 
     def stop(self):
         self.power = False
-        self.quit()
-        self.wait(3000)
+        self.terminate()
 
     def site_image(self,site):
         response = requests.get(site)
