@@ -1,8 +1,8 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from konlpy.tag import Okt
-import re, gc
+import re, gc, sys, os
 import numpy as np
-from nltk import word_tokenize, sent_tokenize
+from nltk import word_tokenize
 
 
 eng_words = set()
@@ -15,15 +15,27 @@ def pkg_exist():
         return False
     else:
         return True
-    
+
+def resource_path(relative_path): #add-data에 사용 - ./words경로
+    try:
+        base_path = sys._MEIPASS
+    except:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path,relative_path)
+
 # 리스트 설정
 def wording(language):
     if(language == 'ko'):
-        with open(r"words\ko_word.txt", 'r', encoding='UTF-8') as f:
+        with open(resource_path(r"words\ko_word.txt"), 'r', encoding='UTF-8') as f:
             kor_words.update(line.strip() for line in f)
+        # with open(resource_path(r"words\ko_word.txt"), 'r', encoding='UTF-8') as f:
+        #     kor_words.update(line.strip() for line in f)
     elif(language == 'en'):
-        with open(r"words\eng_word.txt", 'r', encoding='UTF-8') as f:
+        with open(resource_path(r"words\eng_word.txt"), 'r', encoding='UTF-8') as f:
             eng_words.update(line.strip() for line in f)
+        # with open(resource_path(r"words\eng_word.txt"), 'r', encoding='UTF-8') as f:
+        #     eng_words.update(line.strip() for line in f)
+
 
 def split_sentence(text):
     #문장 분리 -> 리스트 형태로
