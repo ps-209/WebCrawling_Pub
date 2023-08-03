@@ -11,7 +11,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super(Main_window,self).__init__()
-        self.setFixedSize(529, 400)
+        self.setFixedSize(532, 402)
         self.work_thread = None
         self.setupUi(self)
         self.tableWidget.setColumnWidth(0,self.tableWidget.width())
@@ -19,6 +19,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
         self.option_select.currentIndexChanged.connect(self.setting_option)
+        self.version.setText("v1.0.0")
 
     def button_state_off(self): #버튼 오프
         self.search_button.setDisabled(True)
