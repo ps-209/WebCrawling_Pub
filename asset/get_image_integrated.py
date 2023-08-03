@@ -25,6 +25,7 @@ class Image(QThread):
         if(self.get_internet == False):
             self.power = False
             return
+        self.browser_driver()
         for i in target:
             if("http" in i or "html" in i):
                 self.site_image(i)
@@ -44,9 +45,28 @@ class Image(QThread):
         self.power = False
         self.terminate()
 
+    def browser_driver(self): #브라우저 설정
+        bw_options = webdriver.ChromeOptions()
+        bw_options.add_argument('--headless')
+        bw_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43")
+        bw_options.add_argument('--disable-gpu')
+        bw_options.add_argument('--mute-audio')
+        bw_options.add_argument('--disable-extensions')
+        bw_options.add_argument('--remote-allow-origins=*')
+        #bw_options.add_experimental_option('detach', True)
+        os.environ['WDM_PROGRESS_BAR'] = str(0)
+        os.environ['WDM_LOG'] = str(logging.NOTSET)
+        serv = Service(ChromeDriverManager().install())
+        self.browser = webdriver.Chrome(service=serv,options=bw_options)
+
     def site_image(self,site):
-        response = requests.get(site)
-        soup = bs4.BeautifulSoup(response.text,'html.parser')
+        #response = requests.get(site)
+        self.browser.get(site)
+        self.browser.implicitly_wait(5)
+        html = self.browser.page_source
+
+        #soup = bs4.BeautifulSoup(response.text,'html.parser')
+        soup = bs4.BeautifulSoup(html,'html.parser')
         img_num = int(0)
         for tag in soup.find_all('img'):
             src = tag.get('src')
@@ -59,29 +79,10 @@ class Image(QThread):
 
     def keyword_image(self,keyword):
         max = int(self.number)
-        #브라우저 설정
-        bw_options = webdriver.ChromeOptions()
-
-        bw_options.add_argument('--headless')
-        #user-agent는 구글에 user agent string 검색후 자신의 브라우저 에이젼트 복사해 사용
-        bw_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43")
-        bw_options.add_argument('--disable-gpu')
-        bw_options.add_argument('--mute-audio')
-        bw_options.add_argument('--disable-extensions')
-        bw_options.add_argument('--remote-allow-origins=*')
-        #작동 테스트시 추가
-        #bw_options.add_experimental_option('detach', True)
-        
-        #브라우저 + WDM로그 제거
-        os.environ['WDM_PROGRESS_BAR'] = str(0)
-        os.environ['WDM_LOG'] = str(logging.NOTSET)
-        serv = Service(ChromeDriverManager().install())
-        browser = webdriver.Chrome(service=serv,options=bw_options)
-
         #검색
-        browser.get("https://www.google.com/search?q=" + keyword + "&source=lnms&tbm=isch")
-        browser.implicitly_wait(3)
-        browser.execute_script('window.scrollTo(0,0);')
+        self.browser.get("https://www.google.com/search?q=" + keyword + "&source=lnms&tbm=isch")
+        self.browser.implicitly_wait(3)
+        self.browser.execute_script('window.scrollTo(0,0);')
 
         img_num = int(0) #이미지 넘버링
         i = int(1) #이미지 순서를 위한
@@ -95,16 +96,16 @@ class Image(QThread):
 
             #미리보기 이미지 경로
             PreviewXPath = '//*[@id="islrg"]/div[1]/div[%s]/a[1]/div[1]/img'%i
-            Preview = browser.find_element(By.XPATH,PreviewXPath)
+            Preview = self.browser.find_element(By.XPATH,PreviewXPath)
             PreviewURL = Preview.get_attribute('src')
 
             #이미지 클릭
-            browser.find_element(By.XPATH,xPath).click()
+            self.browser.find_element(By.XPATH,xPath).click()
 
             #미리보기 이미지, 클릭된 이미지 대조 확인
             StartTime = time.time()
             while True:
-                Image = browser.find_element(By.XPATH,'//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]')
+                Image = self.browser.find_element(By.XPATH,'//*[@id="Sva75c"]/div[2]/div[2]/div[2]/div[2]/c-wiz/div/div/div/div[3]/div[1]/a/img[1]')
                 ImageURL = Image.get_attribute('src')
                 if(ImageURL != PreviewURL):
                     confirm = self.download(keyword,ImageURL,img_num)
@@ -124,6 +125,8 @@ class Image(QThread):
     def download(self,keyword,url,num):
         directory = self.folder
         picture_type = str(self.picture_type)
+        if(not os.path.exists(directory)):
+            os.makedirs(directory)
         try:
             re = requests.get(url)
             if(re.status_code == 200):
