@@ -19,7 +19,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
         self.option_select.currentIndexChanged.connect(self.setting_option)
-        self.version.setText("v1.0.0")
+        self.version.setText("v1.0.1")
 
     def button_state_off(self): #버튼 오프
         self.search_button.setDisabled(True)
