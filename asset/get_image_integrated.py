@@ -56,7 +56,7 @@ class Image(QThread):
         #bw_options.add_experimental_option('detach', True)
         os.environ['WDM_PROGRESS_BAR'] = str(0)
         os.environ['WDM_LOG'] = str(logging.NOTSET)
-        serv = Service(ChromeDriverManager().install())
+        serv = Service(ChromeDriverManager(version='114.0.5735.90').install())
         self.browser = webdriver.Chrome(service=serv,options=bw_options)
 
     def site_image(self,site):
