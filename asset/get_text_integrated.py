@@ -1,4 +1,7 @@
-import requests, re, sys, gc
+import requests, re, sys, gc, os, logging
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from newspaper import Article
 from asset.summarize_v3 import summarize
@@ -50,6 +53,8 @@ class Text(QThread):
             return 'unknown'
 
     def save_text(self,key_word,contents,folder_directory):
+        if(not os.path.exists(folder_directory)):
+            os.makedirs(folder_directory)
         try:
             with open(folder_directory + key_word + '.txt','w', encoding='utf-8') as file:
                 file.write(str(contents))
@@ -166,7 +171,7 @@ class Text(QThread):
             else:
                 self.keyword_crawling(i)
         gc.collect()
-        self.process_complete.emit("completed","Text Crawling Ended")
+        self.process_complete.emit("completed","Text Crawling Ended\nTotal {}".format(self.progress_count))
         self.power = False
 
     def run(self):
