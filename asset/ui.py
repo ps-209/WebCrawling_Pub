@@ -28,6 +28,7 @@ class Ui_MainWindow(object):
         MainWindow.setMaximumSize(QSize(532, 402))
         font = QFont()
         font.setPointSize(10)
+        font.setStyleStrategy(QFont.PreferAntialias)
         MainWindow.setFont(font)
         icon = QIcon()
         icon.addFile(u":/icon/icon/w.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -41,6 +42,7 @@ class Ui_MainWindow(object):
         font1 = QFont()
         font1.setFamilies([u"Arial"])
         font1.setPointSize(10)
+        font1.setStyleStrategy(QFont.PreferAntialias)
         self.search_button.setFont(font1)
         self.label_2 = QLabel(self.centralwidget)
         self.label_2.setObjectName(u"label_2")
@@ -49,6 +51,7 @@ class Ui_MainWindow(object):
         font2.setFamilies([u"Arial"])
         font2.setPointSize(10)
         font2.setBold(False)
+        font2.setStyleStrategy(QFont.PreferAntialias)
         self.label_2.setFont(font2)
         self.label_1 = QLabel(self.centralwidget)
         self.label_1.setObjectName(u"label_1")
@@ -114,6 +117,7 @@ class Ui_MainWindow(object):
         font3.setFamilies([u"Arial"])
         font3.setPointSize(11)
         font3.setBold(True)
+        font3.setStyleStrategy(QFont.PreferAntialias)
         self.start_button.setFont(font3)
         self.tableWidget = QTableWidget(self.centralwidget)
         if (self.tableWidget.columnCount() < 1):
@@ -130,9 +134,18 @@ class Ui_MainWindow(object):
         font5.setFamilies([u"\ub9d1\uc740 \uace0\ub515"])
         font5.setPointSize(10)
         font5.setBold(False)
+        font5.setStyleStrategy(QFont.PreferAntialias)
         self.tableWidget.setFont(font5)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(False)
         self.tableWidget.horizontalHeader().setMinimumSectionSize(36)
+        self.version = QLabel(self.centralwidget)
+        self.version.setObjectName(u"version")
+        self.version.setGeometry(QRect(470, 10, 48, 16))
+        font6 = QFont()
+        font6.setFamilies([u"Arial"])
+        font6.setPointSize(11)
+        font6.setStyleStrategy(QFont.PreferAntialias)
+        self.version.setFont(font6)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -170,5 +183,6 @@ class Ui_MainWindow(object):
         self.start_button.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"KeyList", None));
+        self.version.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"right\">v1.0.0</p></body></html>", None))
     # retranslateUi
 

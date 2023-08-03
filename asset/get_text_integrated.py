@@ -131,6 +131,7 @@ class Text(QThread):
 
         summarized_content = '\n'.join(final_content)
         self.save_text(keyword,summarized_content,self.folder)
+        gc.collect()
     
     def site_crawling(self,site):
         content = self.get_crawling(site)
@@ -152,6 +153,7 @@ class Text(QThread):
         self.save_text(f"site_crawling_{self.progress_count}",summarized_content,self.folder)
         self.progress_count += 1
         self.progress_updated.emit(self.progress_count)
+        gc.collect()
 
     def switching(self):
         target = self.target #리스트 형태로 존재

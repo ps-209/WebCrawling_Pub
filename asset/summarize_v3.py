@@ -28,14 +28,9 @@ def wording(language):
     if(language == 'ko'):
         with open(resource_path(r"words\ko_word.txt"), 'r', encoding='UTF-8') as f:
             kor_words.update(line.strip() for line in f)
-        # with open(resource_path(r"words\ko_word.txt"), 'r', encoding='UTF-8') as f:
-        #     kor_words.update(line.strip() for line in f)
     elif(language == 'en'):
         with open(resource_path(r"words\eng_word.txt"), 'r', encoding='UTF-8') as f:
             eng_words.update(line.strip() for line in f)
-        # with open(resource_path(r"words\eng_word.txt"), 'r', encoding='UTF-8') as f:
-        #     eng_words.update(line.strip() for line in f)
-
 
 def split_sentence(text):
     #문장 분리 -> 리스트 형태로
