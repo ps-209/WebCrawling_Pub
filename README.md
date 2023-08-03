@@ -6,6 +6,7 @@ Adding features
  2. finished alarm - completed
  3. make into exe file - completed(total 220mb - 3sec, 140mb - 6sec)
  4. site image crawling - completed
+ 5. text crawling accuracy
 
 Error,Problem
  1. error on searching image - solved
