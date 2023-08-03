@@ -13,3 +13,6 @@ Error,Problem
  2. error on without console in exe - solved
  3. When turn off, Still remain in process - Threading issue(solved)
  4. file size issue - sklearn package size
+
+Requires
+1. Java Home setup
