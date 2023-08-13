@@ -19,7 +19,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
         self.add_list.clicked.connect(self.adding_list)
         self.start_button.clicked.connect(self.service_start)
         self.option_select.currentIndexChanged.connect(self.setting_option)
-        self.version.setText("v1.0.1")
+        self.version.setText("v1.0.2")
 
     def button_state_off(self): #버튼 오프
         self.search_button.setDisabled(True)
@@ -157,6 +157,7 @@ class Main_window(QMainWindow, Ui_MainWindow):
 
     def error(self,content):
         self.AlartBox(content)
+        self.work_thread.stop()
 
     def ending(self,title,content):
         self.work_thread.stop()
